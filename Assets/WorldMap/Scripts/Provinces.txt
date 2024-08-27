@@ -1,0 +1,320 @@
+{
+    "provinces": [
+        {
+            "provinceNumber": 1,
+            "provinceColor": [30, 8, 33]
+        },
+        {
+            "provinceNumber": 2,
+            "provinceColor": [252, 231, 222]
+        },
+        {
+            "provinceNumber": 3,
+            "provinceColor": [142, 126, 153]
+        },
+        {
+            "provinceNumber": 4,
+            "provinceColor": [125, 153, 62]
+        },
+        {
+            "provinceNumber": 5,
+            "provinceColor": [166, 181, 173]
+        },
+        {
+            "provinceNumber": 6,
+            "provinceColor": [117, 77, 109]
+        },
+        {
+            "provinceNumber": 7,
+            "provinceColor": [188, 169, 172]
+        },
+        {
+            "provinceNumber": 8,
+            "provinceColor": [165, 209, 229]
+        },
+        {
+            "provinceNumber": 9,
+            "provinceColor": [206, 103, 177]
+        },
+        {
+            "provinceNumber": 10,
+            "provinceColor": [42, 57, 224]
+        },
+        {
+            "provinceNumber": 11,
+            "provinceColor": [221, 141, 159]
+        },
+        {
+            "provinceNumber": 12,
+            "provinceColor": [191, 63, 99]
+        },
+        {
+            "provinceNumber": 13,
+            "provinceColor": [55, 57, 58]
+        },
+        {
+            "provinceNumber": 14,
+            "provinceColor": [146, 66, 181]
+        },
+        {
+            "provinceNumber": 15,
+            "provinceColor": [16, 22, 21]
+        },
+        {
+            "provinceNumber": 16,
+            "provinceColor": [81, 89, 64]
+        },
+        {
+            "provinceNumber": 17,
+            "provinceColor": [187, 237, 231]
+        },
+        {
+            "provinceNumber": 18,
+            "provinceColor": [15, 0, 0]
+        },
+        {
+            "provinceNumber": 19,
+            "provinceColor": [170, 15, 147]
+        },
+        {
+            "provinceNumber": 20,
+            "provinceColor": [25, 54, 66]
+        },
+        {
+            "provinceNumber": 21,
+            "provinceColor": [183, 186, 161]
+        },
+        {
+            "provinceNumber": 22,
+            "provinceColor": [228, 244, 198]
+        },
+        {
+            "provinceNumber": 23,
+            "provinceColor": [82, 206, 57]
+        },
+        {
+            "provinceNumber": 24,
+            "provinceColor": [204, 166, 142]
+        },
+        {
+            "provinceNumber": 25,
+            "provinceColor": [26, 35, 26]
+        },
+        {
+            "provinceNumber": 26,
+            "provinceColor": [107, 97, 103]
+        },
+        {
+            "provinceNumber": 27,
+            "provinceColor": [2, 2, 2]
+        },
+        {
+            "provinceNumber": 28,
+            "provinceColor": [6, 73, 12]
+        },
+        {
+            "provinceNumber": 29,
+            "provinceColor": [208, 211, 205]
+        },
+        {
+            "provinceNumber": 30,
+            "provinceColor": [70, 244, 85]
+        },
+        {
+            "provinceNumber": 31,
+            "provinceColor": [58, 3, 32]
+        },
+        {
+            "provinceNumber": 32,
+            "provinceColor": [90, 102, 95]
+        },
+        {
+            "provinceNumber": 33,
+            "provinceColor": [140, 107, 138]
+        },
+        {
+            "provinceNumber": 34,
+            "provinceColor": [75, 81, 25]
+        },
+        {
+            "provinceNumber": 35,
+            "provinceColor": [71, 12, 55]
+        },
+        {
+            "provinceNumber": 36,
+            "provinceColor": [196, 164, 7]
+        },
+        {
+            "provinceNumber": 37,
+            "provinceColor": [195, 221, 175]
+        },
+        {
+            "provinceNumber": 38,
+            "provinceColor": [146, 209, 110]
+        },
+        {
+            "provinceNumber": 39,
+            "provinceColor": [2, 68, 62]
+        },
+        {
+            "provinceNumber": 40,
+            "provinceColor": [124, 120, 135]
+        },
+        {
+            "provinceNumber": 41,
+            "provinceColor": [58, 12, 21]
+        },
+        {
+            "provinceNumber": 42,
+            "provinceColor": [168, 111, 116]
+        },
+        {
+            "provinceNumber": 43,
+            "provinceColor": [102, 137, 85]
+        },
+        {
+            "provinceNumber": 44,
+            "provinceColor": [83, 84, 82]
+        },
+        {
+            "provinceNumber": 45,
+            "provinceColor": [155, 191, 151]
+        },
+        {
+            "provinceNumber": 46,
+            "provinceColor": [19, 214, 49]
+        },
+        {
+            "provinceNumber": 47,
+            "provinceColor": [97, 65, 130]
+        },
+        {
+            "provinceNumber": 48,
+            "provinceColor": [77, 54, 89]
+        },
+        {
+            "provinceNumber": 49,
+            "provinceColor": [69, 109, 52]
+        },
+        {
+            "provinceNumber": 50,
+            "provinceColor": [97, 204, 83]
+        },
+        {
+            "provinceNumber": 51,
+            "provinceColor": [170, 73, 89]
+        },
+        {
+            "provinceNumber": 52,
+            "provinceColor": [68, 43, 79]
+        },
+        {
+            "provinceNumber": 53,
+            "provinceColor": [3, 1, 5]
+        },
+        {
+            "provinceNumber": 54,
+            "provinceColor": [74, 84, 77]
+        },
+        {
+            "provinceNumber": 55,
+            "provinceColor": [175, 96, 103]
+        },
+        {
+            "provinceNumber": 56,
+            "provinceColor": [128, 145, 107]
+        },
+        {
+            "provinceNumber": 57,
+            "provinceColor": [155, 18, 128]
+        },
+        {
+            "provinceNumber": 58,
+            "provinceColor": [33, 29, 33]
+        },
+        {
+            "provinceNumber": 59,
+            "provinceColor": [160, 164, 165]
+        },
+        {
+            "provinceNumber": 60,
+            "provinceColor": [188, 162, 162]
+        },
+        {
+            "provinceNumber": 61,
+            "provinceColor": [76, 72, 51]
+        },
+        {
+            "provinceNumber": 62,
+            "provinceColor": [33, 16, 0]
+        },
+        {
+            "provinceNumber": 63,
+            "provinceColor": [99, 17, 2]
+        },
+        {
+            "provinceNumber": 64,
+            "provinceColor": [46, 234, 162]
+        },
+        {
+            "provinceNumber": 65,
+            "provinceColor": [106, 145, 141]
+        },
+        {
+            "provinceNumber": 66,
+            "provinceColor": [99, 119, 137]
+        },
+        {
+            "provinceNumber": 67,
+            "provinceColor": [65, 99, 90]
+        },
+        {
+            "provinceNumber": 68,
+            "provinceColor": [50, 76, 76]
+        },
+        {
+            "provinceNumber": 69,
+            "provinceColor": [43, 58, 58]
+        },
+        {
+            "provinceNumber": 70,
+            "provinceColor": [192, 237, 173]
+        },
+        {
+            "provinceNumber": 71,
+            "provinceColor": [104, 151, 226]
+        },
+        {
+            "provinceNumber": 72,
+            "provinceColor": [65, 67, 104]
+        },
+        {
+            "provinceNumber": 73,
+            "provinceColor": [91, 83, 117]
+        },
+        {
+            "provinceNumber": 74,
+            "provinceColor": [152, 202, 224]
+        },
+        {
+            "provinceNumber": 75,
+            "provinceColor": [195, 198, 188]
+        },
+        {
+            "provinceNumber": 76,
+            "provinceColor": [51, 26, 40]
+        },
+        {
+            "provinceNumber": 77,
+            "provinceColor": [136, 137, 137]
+        },
+        {
+            "provinceNumber": 78,
+            "provinceColor": [20, 16, 3]
+        },
+        {
+            "provinceNumber": 79,
+            "provinceColor": [33, 124, 158]
+        }
+    ]
+}
