@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class BorderShower : MonoBehaviour
 {
     Dictionary<long, List<Float2>> borders = new();
     Dictionary<uint, List<long>> provincesBorders = new();
+    Dictionary<long, List<Int2>> bordersInt = new();
 
     uint lastProvince = 0;
     uint gizmosProvince = 0;
@@ -49,13 +51,30 @@ public class BorderShower : MonoBehaviour
         material.SetTexture("_TerrainTex", terrTex);
 
         CalculatePoints(mainArr);
+        ClearPointsList();
 
         terrTex.SetPixels32(terrArr);
         terrTex.Apply(false);
         terrTex.filterMode = FilterMode.Point;
         material.SetTexture("_TerrainTex", terrTex);
 
-        ClearPointsList();
+        foreach (var border in bordersInt) 
+        {
+            List<Float2> float2 = new();
+
+            foreach (var intPoint in border.Value) 
+            {
+                Float2 point = new();
+                point.position = intPoint.position;
+                point.color = intPoint.color;
+
+                point.x = (float)intPoint.x / (width * 2);
+                point.y = (float)intPoint.y / (height * 2);
+                float2.Add(point);
+            }
+
+            borders.Add(border.Key, float2);
+        }
 
         foreach (var province in GetComponent<Mapshower>().palleteColorOfsets)
         {
@@ -307,11 +326,6 @@ public class BorderShower : MonoBehaviour
 
     private void CalculatePoints(Color32[] mainArr)
     {
-        bool isFirstDownUp = true;
-        bool lastLeftRight = false;
-        float normalizedWidth = 1f / width;
-        float normalizedHeight = 1f / height;
-
         for (int i = 0; i < mainArr.Length - 1; i++)
         {
             Color32 leftDown = mainArr[i];
@@ -322,61 +336,56 @@ public class BorderShower : MonoBehaviour
 
             if (!leftDown.CompareRGB(leftUp))
             {
-                var result = CalculateUVFromIndex(i, width, height);
-                //result.x += normalizedWidth;
-                //result.y += normalizedHeight;
+                var result = CalculatePosFromIndex(i, width, height);
+                result.y = (result.y + 1) * 2;
+                result.x = (result.x + 1) * 2;
                 result.color = 2;
                 result.position = i;
                 if (LessThanColor(leftDown, leftUp))
                 {
                     
-                    AddToDictionary(((long)Color32ToUInt(leftUp) << 32) + Color32ToUInt(leftDown), result, borders);
-                    if (isFirstDownUp && !lastLeftRight)
-                    {
-                        result.position -= 1;
-                        result.x -= normalizedWidth;
-                        AddToDictionary(((long)Color32ToUInt(leftUp) << 32) + Color32ToUInt(leftDown), result, borders);
-                    }
-
+                    AddToDictionary(((long)Color32ToUInt(leftUp) << 32) + Color32ToUInt(leftDown), result, bordersInt);
+                    result.position -= 1;
+                    result.x -= 2;
+                    AddToDictionary(((long)Color32ToUInt(leftUp) << 32) + Color32ToUInt(leftDown), result, bordersInt);
                 }
                 else
                 {
-                    AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(leftUp), result, borders);
-                    if (isFirstDownUp && !lastLeftRight)
-                    {
-                        result.position -= 1;
-                        result.x -= normalizedWidth;
-                        AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(leftUp), result, borders);
-                    }
+                    AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(leftUp), result, bordersInt);
+                    result.position -= 1;
+                    result.x -= 2;
+                    AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(leftUp), result, bordersInt);
                 }
-
-                isFirstDownUp = false;
             }
-            else
-                isFirstDownUp = true;
 
             if (!leftDown.CompareRGB(rightDown))
             {
-                var result = CalculateUVFromIndex(i, width, height);
-                //result.x += normalizedWidth;
-                //result.y += normalizedHeight;
+                var result = CalculatePosFromIndex(i, width, height);
+                result.y = (result.y + 1) * 2;
+                result.x = (result.x + 1) * 2;
                 result.color = 1;
                 result.position = i;
                 if (LessThanColor(leftDown, rightDown))
-                    AddToDictionary(((long)Color32ToUInt(rightDown) << 32) + Color32ToUInt(leftDown), result, borders);
+                {
+                    AddToDictionary(((long)Color32ToUInt(rightDown) << 32) + Color32ToUInt(leftDown), result, bordersInt);
+                    result.position -= width;
+                    result.y -= 2;
+                    AddToDictionary(((long)Color32ToUInt(rightDown) << 32) + Color32ToUInt(leftDown), result, bordersInt);
+                }
                 else
-                    AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(rightDown), result, borders);
-
-                lastLeftRight = true;
+                {
+                    AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(rightDown), result, bordersInt);
+                    result.position -= width;
+                    result.y -= 2;
+                    AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(rightDown), result, bordersInt);
+                }
             }
-            else
-                lastLeftRight = false;
         }
     }
 
     private void ClearPointsList()
     {
-        foreach (var i in borders)
+        foreach (var i in bordersInt)
         {
             var temp = i.Value.Distinct().ToList();
             i.Value.Clear();
@@ -384,15 +393,22 @@ public class BorderShower : MonoBehaviour
         }
     }
 
-    private static void AddToDictionary(long key, Float2 value, Dictionary<long, List<Float2>> dictionary)
+    private static void AddToDictionary(long key, Int2 value, Dictionary<long, List<Int2>> dictionary)
     {
         if (!dictionary.TryGetValue(key, out var list))
         {
-            list = new List<Float2>();
+            list = new List<Int2>();
             dictionary[key] = list;
         }
 
         list.Add(value);
+    }
+
+    private static Int2 CalculatePosFromIndex(int index, int width, int height) 
+    {
+        int y = (index / width);
+        int x = (index % width);
+        return new Int2(x, y);
     }
 
     private static Float2 CalculateUVFromIndex(int index, int width, int height) 
@@ -452,6 +468,8 @@ public class BorderShower : MonoBehaviour
                 terrArr[a.position] = new Color32(255,0,0,255);
             }
         }
+
+        terrTex.Apply(false);
     }
 
     private void OnDrawGizmos()
@@ -462,8 +480,8 @@ public class BorderShower : MonoBehaviour
             foreach (var a in provincesBorders[gizmosProvince])
             {
                 //var a = provincesBorders[gizmosProvince][enumerator % provincesBorders[gizmosProvince].Count];
-                Color32 first = new Color32((byte)(a >> 24), (byte)(a >> 16), (byte)(a >> 8), (byte)a);
-                Color32 second = new Color32((byte)(a >> 56), (byte)(a >> 48), (byte)(a >> 40), (byte)(a >> 32));
+                //Color32 first = new Color32((byte)(a >> 24), (byte)(a >> 16), (byte)(a >> 8), (byte)a);
+                //Color32 second = new Color32((byte)(a >> 56), (byte)(a >> 48), (byte)(a >> 40), (byte)(a >> 32));
 
                 //Debug.Log($"Color 1:{first}; Color 2:{second}");
 

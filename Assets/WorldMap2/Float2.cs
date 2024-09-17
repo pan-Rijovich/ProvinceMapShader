@@ -15,7 +15,6 @@ public struct Float2
         position = 0;
     }
 
-    // Переопределение метода Equals для сравнения структур
     public override bool Equals(object obj)
     {
         if (!(obj is Float2)) return false;
