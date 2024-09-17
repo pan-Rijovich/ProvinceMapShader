@@ -2,14 +2,14 @@ Shader "Unlit/MapShower"
 {
     Properties
     {
-        _MainTex ("Province", 2D) = "white" {}
+        _ProvinceTex ("Province", 2D) = "white" {}
         [HideInInspector]
         _RemapTex ("Remap", 2D) = "white" {}
         [HideInInspector]
         _PaletteTex ("Pallete", 2D) = "white" {}
         _TerrainTex ("Terrain", 2D) = "white" {}
 
-        _BorderSize ("Border Size", Range(0.0001, 0.001)) = 0.001
+        _BorderSize ("Border Size", Range(0.00001, 0.001)) = 0.001
         _BorderColor ("Border Color", Color) = (0,0,0,1)
     }
     SubShader
@@ -40,11 +40,11 @@ Shader "Unlit/MapShower"
                 float4 vertex : SV_POSITION;
             };
 
-            sampler2D _MainTex;
+            sampler2D _ProvinceTex;
             sampler2D _RemapTex;
             sampler2D _PaletteTex;
             sampler2D _TerrainTex;
-            float4 _MainTex_ST;
+            float4 _ProvinceTex_ST;
 
             float _BorderSize;
             fixed4 _BorderColor;
@@ -53,7 +53,7 @@ Shader "Unlit/MapShower"
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.uv = TRANSFORM_TEX(v.uv, _ProvinceTex);
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
@@ -61,15 +61,17 @@ Shader "Unlit/MapShower"
             fixed4 frag (v2f i) : SV_Target
             {
                 // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
+                fixed4 col = tex2D(_ProvinceTex, i.uv);
+                
                 //return tex2D(_MainTex, i.uv) - tex2D(_MainTex, i.uv + float2(0.001, 0));
-                fixed4 c1 = tex2D(_MainTex, i.uv + float2(_BorderSize, 0));
-                fixed4 c2 = tex2D(_MainTex, i.uv - float2(_BorderSize, 0));
-                fixed4 c3 = tex2D(_MainTex, i.uv + float2(0, _BorderSize));
-                fixed4 c4 = tex2D(_MainTex, i.uv - float2(0, _BorderSize));
+                fixed4 c1 = tex2D(_ProvinceTex, i.uv + float2(_BorderSize, 0));
+                fixed4 c2 = tex2D(_ProvinceTex, i.uv - float2(_BorderSize, 0));
+                fixed4 c3 = tex2D(_ProvinceTex, i.uv + float2(0, _BorderSize));
+                fixed4 c4 = tex2D(_ProvinceTex, i.uv - float2(0, _BorderSize));
 
                 if((any(c1 != col) || any(c2 != col) || any(c3 != col) || any(c4 != col))){
-                    return lerp(tex2D(_TerrainTex, i.uv), _BorderColor, _BorderColor.a);
+                   fixed3 smoothness = (abs(col - c1) + abs(col - c2) + abs(col - c3) + abs(col - c4));
+                   return lerp(tex2D(_TerrainTex, i.uv), _BorderColor, _BorderColor.a);
                 }
                 fixed4 index = tex2D(_RemapTex, i.uv);
                 fixed4 paletteValue = tex2D(_PaletteTex, index.xy * 255.0 / 256.0 + float2(0.001953125, 0.001953125));
@@ -78,6 +80,7 @@ Shader "Unlit/MapShower"
                 //return fixed4(1,1,1,1);
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
+                //return fixed4(1,1,1,1);
                 return col;
             }
             ENDCG

@@ -31,19 +31,23 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _ProvinceTex:
+        m_Texture: {fileID: 2800000, guid: d37796bce043e11458729d16cb38c794, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _RemapTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TerrainTex:
-        m_Texture: {fileID: 2800000, guid: 406e87e2740225544a4e0b3749aec65d, type: 3}
+        m_Texture: {fileID: 2800000, guid: 89bebca89a5366e48ba27cb31d8d76b6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BorderSize: 0.0001
+    - _BorderSize: 0.00001
     - _DebugFloat: 0.01
     m_Colors:
-    - _BorderColor: {r: 1, g: 0, b: 0, a: 1}
+    - _BorderColor: {r: 0, g: 1, b: 0.23956394, a: 1}
     - _DebugColor: {r: 0.58431375, g: 0.32156864, b: 0.7529412, a: 1}
   m_BuildTextureStacks: []
