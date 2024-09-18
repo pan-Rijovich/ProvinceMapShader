@@ -262,6 +262,7 @@ MonoBehaviour:
   _gizmosSize: 0
   _DisplaySinglePoints: 0
   _DisplayDeletedLines: 0
+  _lineRendererPrefab: {fileID: 1196981535863215847, guid: 0f5c45a25b0dd794eb5feaf16726ba62, type: 3}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -5434,6 +5435,7 @@ MonoBehaviour:
   _gizmosSize: 0
   _DisplaySinglePoints: 0
   _DisplayDeletedLines: 0
+  _lineRendererPrefab: {fileID: 1196981535863215847, guid: 0f5c45a25b0dd794eb5feaf16726ba62, type: 3}
 --- !u!64 &1778229116
 MeshCollider:
   m_ObjectHideFlags: 0

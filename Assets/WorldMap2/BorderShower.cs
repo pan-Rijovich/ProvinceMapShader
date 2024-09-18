@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class BorderShower : MonoBehaviour
@@ -30,6 +31,10 @@ public class BorderShower : MonoBehaviour
 
     [SerializeField] private bool _DisplaySinglePoints;
     [SerializeField] private bool _DisplayDeletedLines;
+
+    [SerializeField] private LineRenderer _lineRendererPrefab;
+
+    private readonly List<LineRenderer> _lineRenderer = new();
 
     private void Start()
     {
@@ -76,6 +81,11 @@ public class BorderShower : MonoBehaviour
         SortPointsIntoLine(_width, _height, mainArr);
 
         CalcMeshSize();
+
+        //foreach (var province in _provincesBorders.Keys) 
+        //{
+        //    DrawLines(province);
+        //}
     }
 
     private void ConvertToFloat2()
@@ -458,7 +468,61 @@ public class BorderShower : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
                 _gizmosProvince = Color32ToUInt(_mainTex.GetPixel(x, y));
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+                LineRendererBorderSmooth(Color32ToUInt(_mainTex.GetPixel(x, y)));
             //Debug.Log($"gizmos province:{gizmosProvince}");
+        }
+    }
+
+    private void LineRendererBorder(uint color) 
+    {
+        if (_lineRenderer.Count == 0)
+        {
+            DrawLines(color);
+        }
+        else
+        {
+            foreach (var line in _lineRenderer) 
+            {
+                Destroy(line.gameObject);
+            }
+            _lineRenderer.Clear();
+            DrawLines(color);
+        }
+    }
+    private void LineRendererBorderSmooth(uint color)
+    {
+        if (_lineRenderer.Count == 0)
+        {
+            DrawLines(color);
+        }
+        else
+        {
+            foreach (var line in _lineRenderer)
+            {
+                Destroy(line.gameObject);
+            }
+            _lineRenderer.Clear();
+            DrawLines(color);
+        }
+    }
+
+    private void DrawLines(uint color)
+    {
+        foreach (var a in _provincesBorders[color])
+        {
+            foreach (var b in _borders[a])
+            {
+                _lineRenderer.Add(Instantiate(_lineRendererPrefab));
+                Vector3[] points = new Vector3[b.Count];
+                for (int i = 0; i < b.Count; i++) 
+                {
+                    points[i] = CalcPosFromUV(b[i], transform.position) + new Vector3(0, 0, -0.01f);
+                }
+
+                _lineRenderer.Last().positionCount = b.Count * 2;
+                _lineRenderer.Last().SetPositions(BSpline.CalculateBSpline(points.ToList(), b.Count * 2).ToArray());
+            }
         }
     }
 
@@ -480,7 +544,7 @@ public class BorderShower : MonoBehaviour
         _terrTex.Apply(false);
     }
 
-    private void OnDrawGizmos()
+    private void NoGizmos()
     {
         if (Application.isPlaying)
         {
