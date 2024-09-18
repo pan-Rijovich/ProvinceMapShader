@@ -1,113 +1,104 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 
 public class BorderShower : MonoBehaviour
 {
-    Dictionary<long, List<Float2>> borders = new();
-    Dictionary<uint, List<long>> provincesBorders = new();
-    Dictionary<long, List<Int2>> bordersInt = new();
+    private readonly Dictionary<long, List<Float2>> _borders = new();
+    private readonly Dictionary<uint, List<long>> _provincesBorders = new();
+    private readonly Dictionary<long, List<Int2>> _bordersInt = new();
 
-    uint lastProvince = 0;
-    uint gizmosProvince = 0;
-    Vector3 meshSize;
+    private uint _gizmosProvince = 0;
+    private Vector3 _meshSize;
 
-    int enumerator = 0;
-    Texture2D terrTex;
-    Texture2D mainTex;
+    private int _enumerator = 0;
+    private Texture2D _terrTex;
+    private Texture2D _mainTex;
 
-    [SerializeField] Texture2D palleteOffsets;
+    [SerializeField] private Texture2D _palleteOffsets;
 
-    int width;
-    int height;
+    private int _width;
+    private int _height;
 
-    List<List<Float2>> float2s = new();
-    List<List<Float2>> deletedLines = new();
-    [Range(0.35f,10f)][SerializeField] float gizmosSize;
-    [SerializeField] bool _ChangeOffset;
-    [SerializeField] bool _DisplaySinglePoints;
-    [SerializeField] bool _DisplayDeletedLines;
+    private readonly List<List<Float2>> _float2s = new();
+    private readonly List<List<Float2>> _deletedLines = new();
 
-    void Start()
+    [Range(0.35f,10f)]
+    [SerializeField] private float _gizmosSize;
+
+    [SerializeField] private bool _DisplaySinglePoints;
+    [SerializeField] private bool _DisplayDeletedLines;
+
+    private void Start()
     {
         var material = GetComponent<Renderer>().material;
-        mainTex = material.GetTexture("_ProvinceTex") as Texture2D;
-        var mainArr = mainTex.GetPixels32();
+        _mainTex = material.GetTexture("_ProvinceTex") as Texture2D;
+        var mainArr = _mainTex.GetPixels32();
 
-        width = mainTex.width;
-        height = mainTex.height;
+        _width = _mainTex.width;
+        _height = _mainTex.height;
 
-        terrTex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        _terrTex = new Texture2D(_width, _height, TextureFormat.RGBA32, false);
         var terrArr = new Color32[mainArr.Length];
 
         FillColorArray(terrArr, new Color32(255, 255, 255, 255));
 
-        terrTex.SetPixels32(terrArr);
-        terrTex.Apply(false);
-        terrTex.filterMode = FilterMode.Point;
-        material.SetTexture("_TerrainTex", terrTex);
+        SetTexture(_terrTex, material, terrArr, "_TerrainTex");
 
         CalculatePoints(mainArr);
-        ClearPointsList();
+        ClearPointsIntList(_bordersInt);
 
-        terrTex.SetPixels32(terrArr);
-        terrTex.Apply(false);
-        terrTex.filterMode = FilterMode.Point;
-        material.SetTexture("_TerrainTex", terrTex);
+        _terrTex.SetPixels32(terrArr);
+        _terrTex.Apply(false);
+        _terrTex.filterMode = FilterMode.Point;
+        material.SetTexture("_TerrainTex", _terrTex);
 
-        foreach (var border in bordersInt) 
+        ConvertToFloat2();
+
+        foreach (var border in _borders) 
+        {
+            uint color1 = (uint)border.Key;
+            uint color2 = (uint)(border.Key >> 32);
+
+            AddToDictionary(color1, border.Key, _provincesBorders);
+            AddToDictionary(color2, border.Key, _provincesBorders);
+        }
+
+        Debug.Log($"total borders:{_borders.Count()}");
+        foreach (var br in _borders)
+        {
+            if (br.Value.Count < 2)
+                Debug.LogWarning($"Found borders with points count less than 2. Border id:{br.Key}");
+        }
+
+        SortPointsIntoLine(_width, _height, mainArr);
+
+        CalcMeshSize();
+    }
+
+    private void ConvertToFloat2()
+    {
+        foreach (var border in _bordersInt)
         {
             List<Float2> float2 = new();
 
-            foreach (var intPoint in border.Value) 
+            foreach (var intPoint in border.Value)
             {
-                Float2 point = new();
-                point.position = intPoint.position;
-                point.color = intPoint.color;
+                Float2 point = new()
+                {
+                    position = intPoint.position,
+                    color = intPoint.color,
 
-                point.x = (float)intPoint.x / (width * 2);
-                point.y = (float)intPoint.y / (height * 2);
+                    x = (float)intPoint.x / (_width * 2),
+                    y = (float)intPoint.y / (_height * 2)
+                };
                 float2.Add(point);
             }
 
-            borders.Add(border.Key, float2);
+            _borders.Add(border.Key, float2);
         }
-
-        foreach (var province in GetComponent<Mapshower>().palleteColorOfsets)
-        {
-            uint key = Color32ToUInt(province);
-
-            if (!provincesBorders.TryGetValue(key, out var list))
-            {
-                list = new List<long>();
-                provincesBorders[key] = list;
-            }
-
-            foreach (var i in borders.Keys)
-            {
-                if ((uint)i == key || (uint)(i >> 32) == key) list.Add(i);
-            }
-        }
-
-        Debug.Log($"total borders:{borders.Count()}");
-        foreach (var br in borders.Values)
-        {
-            if (br.Count < 2)
-                Debug.Log($"total points in border:{br.Count}");
-            if (br.Count < 2 && br.Count != 0)
-            {
-                Vector3 position = CalcPosFromUV(br[0], transform.position);
-                float2s.Add(br);
-            }
-
-        }
-
-        SortPointsIntoLine(width, height, mainArr);
-
-        CalcMeshSize();
     }
 
     private void SortPointsIntoLine(int width, int height, Color32[] provinceArr)
@@ -115,11 +106,11 @@ public class BorderShower : MonoBehaviour
         float normalizedWidth = 1f / width;
         float normalizedHeight = 1f / height;
 
-        foreach (var float2list in borders.Values.ToList())
+        foreach (var float2list in _borders.Values.ToList())
         {
             if (float2list.Count < 2)
                 continue;
-            List<Float2> result = new List<Float2>
+            List<Float2> result = new()
             {
                 float2list.First()
             };
@@ -148,7 +139,7 @@ public class BorderShower : MonoBehaviour
             {
                 var line = new List<Float2>();
                 line.AddRange(float2list);
-                deletedLines.Add(line);
+                _deletedLines.Add(line);
                 Debug.Log($"Deleted points count:{float2list.Count}");
             }
             float2list.Clear();
@@ -303,14 +294,6 @@ public class BorderShower : MonoBehaviour
         }
     }
 
-    private static void FillColorArray(Color32[] texture, Color32 targetColor)
-    {
-        for (int i = 0; i < texture.Length; i++)
-        {
-            texture[i] = targetColor;
-        }
-    }
-
     private void CalcMeshSize()
     {
         var mesh = GetComponent<MeshFilter>().mesh;
@@ -320,7 +303,7 @@ public class BorderShower : MonoBehaviour
             Vector3 vector3 = Vector3.zero;
             vector3 += mesh.bounds.size;
             vector3 = new Vector3(vector3.x * transform.localScale.x, vector3.y * transform.localScale.y, vector3.z * transform.localScale.z);
-            meshSize = vector3;
+            _meshSize = vector3;
         }
     }
 
@@ -331,12 +314,12 @@ public class BorderShower : MonoBehaviour
             Color32 leftDown = mainArr[i];
             Color32 rightDown = mainArr[i + 1];
             Color32 leftUp = mainArr[i];
-            if (i + width < mainArr.Length)
-                leftUp = mainArr[i + width];
+            if (i + _width < mainArr.Length)
+                leftUp = mainArr[i + _width];
 
             if (!leftDown.CompareRGB(leftUp))
             {
-                var result = CalculatePosFromIndex(i, width, height);
+                var result = CalculatePosFromIndex(i, _width, _height);
                 result.y = (result.y + 1) * 2;
                 result.x = (result.x + 1) * 2;
                 result.color = 2;
@@ -344,48 +327,56 @@ public class BorderShower : MonoBehaviour
                 if (LessThanColor(leftDown, leftUp))
                 {
                     
-                    AddToDictionary(((long)Color32ToUInt(leftUp) << 32) + Color32ToUInt(leftDown), result, bordersInt);
+                    AddToDictionary(((long)Color32ToUInt(leftUp) << 32) + Color32ToUInt(leftDown), result, _bordersInt);
                     result.position -= 1;
                     result.x -= 2;
-                    AddToDictionary(((long)Color32ToUInt(leftUp) << 32) + Color32ToUInt(leftDown), result, bordersInt);
+                    AddToDictionary(((long)Color32ToUInt(leftUp) << 32) + Color32ToUInt(leftDown), result, _bordersInt);
                 }
                 else
                 {
-                    AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(leftUp), result, bordersInt);
+                    AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(leftUp), result, _bordersInt);
                     result.position -= 1;
                     result.x -= 2;
-                    AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(leftUp), result, bordersInt);
+                    AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(leftUp), result, _bordersInt);
                 }
             }
 
             if (!leftDown.CompareRGB(rightDown))
             {
-                var result = CalculatePosFromIndex(i, width, height);
+                var result = CalculatePosFromIndex(i, _width, _height);
                 result.y = (result.y + 1) * 2;
                 result.x = (result.x + 1) * 2;
                 result.color = 1;
                 result.position = i;
                 if (LessThanColor(leftDown, rightDown))
                 {
-                    AddToDictionary(((long)Color32ToUInt(rightDown) << 32) + Color32ToUInt(leftDown), result, bordersInt);
-                    result.position -= width;
+                    AddToDictionary(((long)Color32ToUInt(rightDown) << 32) + Color32ToUInt(leftDown), result, _bordersInt);
+                    result.position -= _width;
                     result.y -= 2;
-                    AddToDictionary(((long)Color32ToUInt(rightDown) << 32) + Color32ToUInt(leftDown), result, bordersInt);
+                    AddToDictionary(((long)Color32ToUInt(rightDown) << 32) + Color32ToUInt(leftDown), result, _bordersInt);
                 }
                 else
                 {
-                    AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(rightDown), result, bordersInt);
-                    result.position -= width;
+                    AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(rightDown), result, _bordersInt);
+                    result.position -= _width;
                     result.y -= 2;
-                    AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(rightDown), result, bordersInt);
+                    AddToDictionary(((long)Color32ToUInt(leftDown) << 32) + Color32ToUInt(rightDown), result, _bordersInt);
                 }
             }
         }
     }
 
-    private void ClearPointsList()
+    private static void SetTexture(Texture2D texture, Material material, Color32[] terrArr, string textureName)
     {
-        foreach (var i in bordersInt)
+        texture.SetPixels32(terrArr);
+        texture.Apply(false);
+        texture.filterMode = FilterMode.Point;
+        material.SetTexture(textureName, texture);
+    }
+
+    private static void ClearPointsIntList<T,U>(Dictionary<T,List<U>> borders)
+    {
+        foreach (var i in borders)
         {
             var temp = i.Value.Distinct().ToList();
             i.Value.Clear();
@@ -393,11 +384,19 @@ public class BorderShower : MonoBehaviour
         }
     }
 
-    private static void AddToDictionary(long key, Int2 value, Dictionary<long, List<Int2>> dictionary)
+    private static void FillColorArray(Color32[] texture, Color32 targetColor)
+    {
+        for (int i = 0; i < texture.Length; i++)
+        {
+            texture[i] = targetColor;
+        }
+    }
+
+    private static void AddToDictionary<T,U>(T key, U value, Dictionary<T, List<U>> dictionary)
     {
         if (!dictionary.TryGetValue(key, out var list))
         {
-            list = new List<Int2>();
+            list = new List<U>();
             dictionary[key] = list;
         }
 
@@ -416,9 +415,11 @@ public class BorderShower : MonoBehaviour
         int y = (index / width);
         int x = (index % width);
 
-        Float2 uv = new Float2();
-        uv.x = (float)x / width;
-        uv.y = (float)y / height;
+        Float2 uv = new()
+        {
+            x = (float)x / width,
+            y = (float)y / height
+        };
 
         return uv;
     }
@@ -433,62 +434,54 @@ public class BorderShower : MonoBehaviour
         return (uint)(color.a << 24 | color.r << 16 | color.g << 8 | color.b);
     }
 
-    void Update()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1)) 
-            enumerator++;
-        if (Input.GetKeyDown(KeyCode.Alpha2) && enumerator > 0)
-            enumerator--;
+            _enumerator++;
+        if (Input.GetKeyDown(KeyCode.Alpha2) && _enumerator > 0)
+            _enumerator--;
 
         var mousePos = Input.mousePosition;
         var ray = Camera.main.ScreenPointToRay(mousePos);
-        RaycastHit hitInfo;
-        if (Physics.Raycast(ray, out hitInfo))
+        if (Physics.Raycast(ray, out RaycastHit hitInfo))
         {
             var p = hitInfo.textureCoord;
-            int x = (int)Mathf.Floor(p.x * width);
-            int y = (int)Mathf.Floor(p.y * height);
+            int x = (int)Mathf.Floor(p.x * _width);
+            int y = (int)Mathf.Floor(p.y * _height);
 
             //DrawBorder(mainTex.GetPixel(x, y));
 
-            if(Input.GetKeyDown(KeyCode.Mouse0))
-                gizmosProvince = Color32ToUInt(mainTex.GetPixel(x, y));
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+                _gizmosProvince = Color32ToUInt(_mainTex.GetPixel(x, y));
             //Debug.Log($"gizmos province:{gizmosProvince}");
         }
     }
 
     private void DrawBorder(Color color)
     {
-        foreach (var i in provincesBorders[Color32ToUInt(color)]) 
+        foreach (var i in _provincesBorders[Color32ToUInt(color)]) 
         {
-            foreach (var a in borders[i]) 
+            foreach (var a in _borders[i]) 
             {
-                Color32[] terrArr = terrTex.GetPixels32();
+                Color32[] terrArr = _terrTex.GetPixels32();
 
                 terrArr[a.position] = new Color32(255,0,0,255);
             }
         }
 
-        terrTex.Apply(false);
+        _terrTex.Apply(false);
     }
 
     private void OnDrawGizmos()
     {
         if (Application.isPlaying)
         {
-
-            foreach (var a in provincesBorders[gizmosProvince])
+            if (!_provincesBorders.ContainsKey(_gizmosProvince)) return;
+            foreach (var a in _provincesBorders[_gizmosProvince])
             {
-                //var a = provincesBorders[gizmosProvince][enumerator % provincesBorders[gizmosProvince].Count];
-                //Color32 first = new Color32((byte)(a >> 24), (byte)(a >> 16), (byte)(a >> 8), (byte)a);
-                //Color32 second = new Color32((byte)(a >> 56), (byte)(a >> 48), (byte)(a >> 40), (byte)(a >> 32));
-
-                //Debug.Log($"Color 1:{first}; Color 2:{second}");
-
-                for (int index = 0; index < borders[a].Count - 1; index++)
+                for (int index = 0; index < _borders[a].Count - 1; index++)
                 {
-                    var i = borders[a][index];
-                    //Debug.Log(i);
+                    var i = _borders[a][index];
 
                     if (i.color == 1)
                         Gizmos.color = Color.red;
@@ -504,7 +497,7 @@ public class BorderShower : MonoBehaviour
 
                     gizmosPos = CalcPosFromUV(i, gizmosPos);
 
-                    Gizmos.DrawLine(CalcPosFromUV(i, transform.position), CalcPosFromUV(borders[a][index + 1], transform.position));
+                    Gizmos.DrawLine(CalcPosFromUV(i, transform.position), CalcPosFromUV(_borders[a][index + 1], transform.position));
 
                     if (i.color == 1)
                         Gizmos.DrawSphere(gizmosPos, 0.35f);
@@ -522,12 +515,11 @@ public class BorderShower : MonoBehaviour
     {
         if (_DisplayDeletedLines)
         {
-            foreach (var line in deletedLines)
+            foreach (var line in _deletedLines)
             {
                 for (int index = 0; index < line.Count - 1; index++)
                 {
                     var i = line[index];
-                    //Debug.Log(i);
 
                     if (i.color == 1)
                         Gizmos.color = Color.red;
@@ -558,16 +550,16 @@ public class BorderShower : MonoBehaviour
     {
         if (_DisplaySinglePoints)
         {
-            foreach (var br in float2s)
+            foreach (var br in _float2s)
             {
                 Vector3 gizmosPos = this.transform.position;
 
                 gizmosPos = CalcPosFromUV(br[0], gizmosPos);
 
                 if (br[0].color == 1)
-                    Gizmos.DrawSphere(gizmosPos, gizmosSize);
+                    Gizmos.DrawSphere(gizmosPos, _gizmosSize);
                 else if (br[0].color == 2)
-                    Gizmos.DrawSphere(gizmosPos, gizmosSize);
+                    Gizmos.DrawSphere(gizmosPos, _gizmosSize);
             }
         }
     }
@@ -575,17 +567,11 @@ public class BorderShower : MonoBehaviour
     private Vector3 CalcPosFromUV(Float2 i, Vector3 meshCenter)
     {
 
-        meshCenter.x -= meshSize.x / 2;
-        meshCenter.y -= meshSize.y / 2;
+        meshCenter.x -= _meshSize.x / 2;
+        meshCenter.y -= _meshSize.y / 2;
 
-        meshCenter.x += i.x * meshSize.x;
-        meshCenter.y += i.y * meshSize.y;
-
-        if (_ChangeOffset) 
-        {
-            meshCenter.x += 1;
-            meshCenter.y += 1;
-        }
+        meshCenter.x += i.x * _meshSize.x;
+        meshCenter.y += i.y * _meshSize.y;
 
         return meshCenter;
     }
