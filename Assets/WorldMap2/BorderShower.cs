@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class BorderShower : MonoBehaviour
 {
-    private readonly Dictionary<long, List<Float2>> _borders = new();
+    private readonly Dictionary<long, List<List<Float2>>> _borders = new();
     private readonly Dictionary<uint, List<long>> _provincesBorders = new();
     private readonly Dictionary<long, List<Int2>> _bordersInt = new();
 
@@ -69,7 +69,7 @@ public class BorderShower : MonoBehaviour
         Debug.Log($"total borders:{_borders.Count()}");
         foreach (var br in _borders)
         {
-            if (br.Value.Count < 2)
+            if (br.Value[0].Count < 2)
                 Debug.LogWarning($"Found borders with points count less than 2. Border id:{br.Key}");
         }
 
@@ -96,8 +96,11 @@ public class BorderShower : MonoBehaviour
                 };
                 float2.Add(point);
             }
-
-            _borders.Add(border.Key, float2);
+            List<List<Float2>> result = new()
+            {
+                float2
+            };
+            _borders.Add(border.Key, result);
         }
     }
 
@@ -106,32 +109,39 @@ public class BorderShower : MonoBehaviour
         float normalizedWidth = 1f / width;
         float normalizedHeight = 1f / height;
 
-        foreach (var float2list in _borders.Values.ToList())
+        foreach (var a in _borders.Values)
         {
+            var float2list = a[0];
             if (float2list.Count < 2)
                 continue;
-            List<Float2> result = new()
-            {
-                float2list.First()
-            };
-            float2list.RemoveAt(0);
-
-            float threthholdDistance = Mathf.Sqrt(Mathf.Pow(normalizedWidth, normalizedWidth + normalizedWidth) + Mathf.Pow(normalizedHeight, normalizedHeight + normalizedHeight)) * 0.9f;
-            
-            FindLine(width, provinceArr, float2list, result, true);
-            FindLine(width, provinceArr, float2list, result, false);
 
             List<List<Float2>> bordersList = new();
 
             while (float2list.Count > 0) 
             {
                 bordersList.Add(new());
-                bordersList.Last().Add(float2list.First());
-                float2list.RemoveAt(0);
-                FindLine(width, provinceArr, float2list, bordersList.Last(), true);
-                FindLine(width, provinceArr, float2list, bordersList.Last(), false);
 
-                if (bordersList.Last().Count < 1)
+                var currentBorder = bordersList.Last();
+
+                currentBorder.Add(float2list.First());
+                float2list.RemoveAt(0);
+                FindLine(width, provinceArr, float2list, currentBorder, true);
+                FindLine(width, provinceArr, float2list, currentBorder, false);
+
+                int posUp = currentBorder.Last().position + width;
+                int posDown = currentBorder.Last().position - width;
+                int posLeft = currentBorder.Last().position - 1;
+                int posRight = currentBorder.Last().position + 1;
+
+                if (currentBorder.First().position == posUp ||
+                    currentBorder.First().position == posDown ||
+                    currentBorder.First().position == posLeft ||
+                    currentBorder.First().position == posRight) 
+                {
+                    currentBorder.Add(currentBorder.First());
+                }
+
+                if (currentBorder.Count < 1)
                     break;
             }
 
@@ -143,12 +153,9 @@ public class BorderShower : MonoBehaviour
                 Debug.Log($"Deleted points count:{float2list.Count}");
             }
             float2list.Clear();
-            float2list.AddRange(result);
 
-            foreach (var border in bordersList) 
-            {
-                float2list.AddRange(border);
-            }
+            a.Clear();
+            a.AddRange(bordersList);
         }
 
         static void AddPoint(List<Float2> float2list, List<Float2> result, Float2 point, bool append)
@@ -187,9 +194,7 @@ public class BorderShower : MonoBehaviour
                 var naibours = float2list.FindAll((x) =>
                 {
                     if (x.position == posUp || x.position == posDown ||
-                    x.position == posLeft || x.position == posRight ||
-                    x.position == posRightDown || x.position == posRightUp ||
-                    x.position == posLeftUp || x.position == posLeftDown)
+                    x.position == posLeft || x.position == posRight)
                         return true;
 
                     return false;
@@ -463,9 +468,12 @@ public class BorderShower : MonoBehaviour
         {
             foreach (var a in _borders[i]) 
             {
-                Color32[] terrArr = _terrTex.GetPixels32();
+                foreach (var b in a)
+                {
+                    Color32[] terrArr = _terrTex.GetPixels32();
 
-                terrArr[a.position] = new Color32(255,0,0,255);
+                    terrArr[b.position] = new Color32(255, 0, 0, 255);
+                }
             }
         }
 
@@ -479,31 +487,34 @@ public class BorderShower : MonoBehaviour
             if (!_provincesBorders.ContainsKey(_gizmosProvince)) return;
             foreach (var a in _provincesBorders[_gizmosProvince])
             {
-                for (int index = 0; index < _borders[a].Count - 1; index++)
+                foreach (var b in _borders[a])
                 {
-                    var i = _borders[a][index];
+                    for (int index = 0; index < b.Count - 1; index++)
+                    {
+                        var i = b[index];
 
-                    if (i.color == 1)
-                        Gizmos.color = Color.red;
-                    else if (i.color == 2)
-                        Gizmos.color = Color.blue;
-                    else
-                        Gizmos.color = Color.black;
+                        if (i.color == 1)
+                            Gizmos.color = Color.red;
+                        else if (i.color == 2)
+                            Gizmos.color = Color.blue;
+                        else
+                            Gizmos.color = Color.black;
 
-                    Vector3 gizmosPos = this.transform.position;
+                        Vector3 gizmosPos = this.transform.position;
 
-                    if (i.color == 1)
-                        gizmosPos.z += 0.35f;
+                        if (i.color == 1)
+                            gizmosPos.z += 0.35f;
 
-                    gizmosPos = CalcPosFromUV(i, gizmosPos);
+                        gizmosPos = CalcPosFromUV(i, gizmosPos);
 
-                    Gizmos.DrawLine(CalcPosFromUV(i, transform.position), CalcPosFromUV(_borders[a][index + 1], transform.position));
+                        Gizmos.DrawLine(CalcPosFromUV(i, transform.position), CalcPosFromUV(b[index + 1], transform.position));
 
-                    if (i.color == 1)
-                        Gizmos.DrawSphere(gizmosPos, 0.35f);
-                    else if (i.color == 2)
-                        Gizmos.DrawSphere(gizmosPos, 0.15f);
+                        if (i.color == 1)
+                            Gizmos.DrawSphere(gizmosPos, 0.35f);
+                        else if (i.color == 2)
+                            Gizmos.DrawSphere(gizmosPos, 0.15f);
 
+                    }
                 }
             }
             DisplaySinglePoints();
