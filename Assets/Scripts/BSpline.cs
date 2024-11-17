@@ -14,7 +14,7 @@ public class BSpline
         controlPoints.Add(controlPoints.Last());
 
         int n = controlPoints.Count - 1;
-        int degree = 7; // Кубический сплайн
+        int degree = 3; // Кубический сплайн
         float[] knots = CreateKnotVector(n, degree);
 
         for (int i = 0; i <= numPoints; i++)

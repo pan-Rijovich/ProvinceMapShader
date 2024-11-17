@@ -259,10 +259,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34e36caaccc904b409a22bf57469c155, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _palleteOffsets: {fileID: 0}
   _gizmosSize: 0
   _DisplaySinglePoints: 0
   _DisplayDeletedLines: 0
+  _DrawGizmos: 0
   _lineRendererPrefab: {fileID: 1196981535863215847, guid: 0f5c45a25b0dd794eb5feaf16726ba62, type: 3}
 --- !u!1 &705507993
 GameObject:
@@ -5433,10 +5433,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34e36caaccc904b409a22bf57469c155, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _palleteOffsets: {fileID: 0}
   _gizmosSize: 0
   _DisplaySinglePoints: 0
   _DisplayDeletedLines: 0
+  _DrawGizmos: 1
   _lineRendererPrefab: {fileID: 1196981535863215847, guid: 0f5c45a25b0dd794eb5feaf16726ba62, type: 3}
 --- !u!64 &1778229116
 MeshCollider:
