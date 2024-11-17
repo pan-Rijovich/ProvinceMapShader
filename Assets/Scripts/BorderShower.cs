@@ -18,8 +18,6 @@ public class BorderShower : MonoBehaviour
     private Texture2D _terrTex;
     private Texture2D _mainTex;
 
-    [SerializeField] private Texture2D _palleteOffsets;
-
     private int _width;
     private int _height;
 
@@ -31,6 +29,7 @@ public class BorderShower : MonoBehaviour
 
     [SerializeField] private bool _DisplaySinglePoints;
     [SerializeField] private bool _DisplayDeletedLines;
+    [SerializeField] private bool _DrawGizmos;
 
     [SerializeField] private LineRenderer _lineRendererPrefab;
 
@@ -94,8 +93,12 @@ public class BorderShower : MonoBehaviour
                     int posRight = b[i].position + 1;
                     var prev = b[i-1].position;
                     var next = b[i+1].position;
-                    if (!(prev == posLeft && next == posRight || prev == posRight && next == posLeft ||
-                          prev == posDown && next == posUp || prev == posUp && next == posDown)) 
+                    bool IsHorisontal = prev == posLeft && next == posRight || prev == posRight && next == posLeft;
+                    bool IsVertical = prev == posDown && next == posUp || prev == posUp && next == posDown;
+                    bool IsInnerCorner = true;
+                    bool ISOuterCorner = prev == posDown && next == posRight || prev == posRight && next == posDown ;
+
+                    if (!IsHorisontal && !IsVertical) 
                     {
                         border.Add(b[i]);
                     }
@@ -541,9 +544,9 @@ public class BorderShower : MonoBehaviour
         _terrTex.Apply(false);
     }
 
-    private void NoGizmos()
+    private void OnDrawGizmos()
     {
-        if (Application.isPlaying)
+        if (Application.isPlaying && _DrawGizmos)
         {
             if (!_provincesBorders.ContainsKey(_gizmosProvince)) return;
             foreach (var a in _provincesBorders[_gizmosProvince])
