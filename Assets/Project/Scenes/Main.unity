@@ -243,10 +243,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68bbfc4b689c6064da128dc3fedcd81b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Remap: {fileID: 0}
   targetColor:
     serializedVersion: 2
     rgba: 4278190335
+  computeShader: {fileID: 0}
+  remapTex: {fileID: 0}
 --- !u!114 &148709084
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5556,10 +5557,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68bbfc4b689c6064da128dc3fedcd81b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Remap: {fileID: 2800000, guid: c6302d5a4b9fd304bb38d7d1b1cfa9e0, type: 3}
   targetColor:
     serializedVersion: 2
     rgba: 2184722488
+  computeShader: {fileID: 7200000, guid: 8effc7b427f6937439e03a5a564ce8d7, type: 3}
+  remapTex: {fileID: 0}
 --- !u!114 &1778229115
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5567,7 +5569,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1778229113}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 34e36caaccc904b409a22bf57469c155, type: 3}
   m_Name: 

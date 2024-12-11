@@ -1,17 +1,18 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 public class Mapshower : MonoBehaviour
 {
-    [SerializeField] Texture2D Remap;
+    //[SerializeField] Texture2D Remap;
     [SerializeField] Color32 targetColor;
+    [SerializeField] ComputeShader computeShader;
 
     private Color32[] remapArr;
     private Color32[] palleteColorOfsets = new Color32[256 * 256];
     private Texture2D paletteTex;
-    private Texture2D remapTex;
+    [SerializeField] private Texture2D remapTex;
     private int width;
     private int height;
     private Color32 prevRemapColor;
@@ -20,26 +21,21 @@ public class Mapshower : MonoBehaviour
 
     void Start()
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
 
         var material = GetComponent<Renderer>().material;
         provinceTex = material.GetTexture("_ProvinceTex") as Texture2D;
-
-        var main2remap = new Dictionary<Color32, Color32>();
-        remapArr = Remap.GetPixels32();
-        //CalcRemap(main2remap);
-
+        
         width = provinceTex.width;
         height = provinceTex.height;
 
-        InitRemapTexture();
+        InitRemapTexture(null);
+
+        CalcRemap();
+
         InitPaletteTexture();
         material.SetTexture("_PaletteTex", paletteTex);
         material.SetTexture("_RemapTex", remapTex);
 
-        stopwatch.Stop();
-        UnityEngine.Debug.Log($"remap calc time:{stopwatch.Elapsed}\n");
     }
 
     public void SelectProvince(Vector2 position)
@@ -63,25 +59,59 @@ public class Mapshower : MonoBehaviour
         }
     }
 
-    private void CalcRemap(Dictionary<Color32, Color32> main2remap)
+    private void CalcRemap()
     {
-        var mainArr = provinceTex.GetPixels32();
-        int idx = 0;
+        Profiler.BeginSample("Calc remap");
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
 
-        for (int i = 0; i < mainArr.Length; i++)
+        var mainArr = provinceTex.GetRawTextureData();
+        byte[] remapByteArr = new byte[(mainArr.Length / 3) * 2];
+
+        int remapIdx = 0;
+        int idx = 0;
+        var main2remap = new Dictionary<int, short>(4000);
+
+        for (int i = 0; i < mainArr.Length; i += 3)
         {
-            var mainColor = mainArr[i];
-            if (!main2remap.ContainsKey(mainColor))
+            int color24 = mainArr[i + 2] << 16 | mainArr[i + 1] << 8 | mainArr[i];
+            short remapColor;
+            if (!main2remap.ContainsKey(color24))
             {
                 var low = (byte)(idx % 256);
                 var high = (byte)(idx / 256);
-                main2remap[mainColor] = new Color32(low, high, 0, 255);
+                remapColor = (short)(low | high << 8);
+                main2remap[color24] = remapColor;
                 idx++;
-                palleteColorOfsets[(high << 8) + low] = mainColor;
             }
-            var remapColor = main2remap[mainColor];
-            remapArr[i] = remapColor;
+            else
+            {
+                remapColor = main2remap[color24];
+            }
+            remapByteArr[remapIdx++] = (byte)remapColor;
+            remapByteArr[remapIdx++] = (byte)(remapColor >> 8);
         }
+
+        var calcTime = stopwatch.Elapsed;
+        UnityEngine.Debug.Log($"remap calc time:{calcTime}\n");
+
+        remapTex.LoadRawTextureData(remapByteArr);
+        remapTex.Apply(false);
+
+        var fillTime = stopwatch.Elapsed - calcTime;
+        UnityEngine.Debug.Log($"fill remapTex time:{fillTime}\n");
+
+        remapArr = new Color32[mainArr.Length / 3];
+        for (int i = 0; i < mainArr.Length / 3; i++)
+        {
+            remapArr[i] = new Color32(remapByteArr[i << 1], remapByteArr[(i << 1) + 1], 0, 255);
+        }
+
+        UnityEngine.Debug.Log($"fill remapArr time:{stopwatch.Elapsed - fillTime - calcTime}\n");
+
+        stopwatch.Stop();
+        UnityEngine.Debug.Log($"total time:{stopwatch.Elapsed}\n");
+        Profiler.EndSample();
     }
 
     private void ChangeColor(Color32 remapColor, Color32 showColor)
@@ -104,11 +134,14 @@ public class Mapshower : MonoBehaviour
         paletteTex.Apply(false);
     }
 
-    private void InitRemapTexture()
+    private void InitRemapTexture(Color32[] remapArr)
     {
         remapTex = new Texture2D(width, height, TextureFormat.RG16, false);
         remapTex.filterMode = FilterMode.Point;
-        remapTex.SetPixels32(remapArr);
-        remapTex.Apply(false);
+        if (remapArr != null) 
+        {
+            remapTex.SetPixels32(remapArr);
+            remapTex.Apply(false);
+        }
     }
 }
