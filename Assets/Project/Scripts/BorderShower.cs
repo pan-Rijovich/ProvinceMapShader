@@ -505,10 +505,10 @@ public class BorderShower : MonoBehaviour
                 }
 
                 var pointCount = points.Length * 2; // + points.Length / 2;
-                _lineRenderer.Last().positionCount = pointCount;
-                _lineRenderer.Last().SetPositions(BSpline.CalculateBSpline(points.ToList(), pointCount).ToArray());
-                //_lineRenderer.Last().positionCount = points.Length;
-                //_lineRenderer.Last().SetPositions(points);
+                //_lineRenderer.Last().positionCount = pointCount;
+                //_lineRenderer.Last().SetPositions(BSpline.CalculateBSpline(points.ToList(), pointCount).ToArray());
+                _lineRenderer.Last().positionCount = points.Length;
+                _lineRenderer.Last().SetPositions(points);
             }
         }
     }

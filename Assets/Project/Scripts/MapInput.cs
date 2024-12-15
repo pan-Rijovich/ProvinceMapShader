@@ -22,7 +22,7 @@ namespace Assets.Scripts
             RaycastHit hitInfo;
             if (Physics.Raycast(ray, out hitInfo))
             {
-                _mapshower.SelectProvince(hitInfo.textureCoord);
+                if(_mapshower.enabled)_mapshower.SelectProvince(hitInfo.textureCoord);
             }
         }
 
