@@ -27,7 +27,7 @@ namespace MapBorderRenderer
 
         private void DrawLines(uint color)
         {
-            foreach (var borderID in _data.ProvincesBorders[color])
+            /*foreach (var borderID in _data.ProvincesBorders[color])
             {
                 foreach (var border in _data.Borders[borderID].Points)
                 {
@@ -43,7 +43,7 @@ namespace MapBorderRenderer
                     //_data._lineRenderer.Last().SetPositions(BSpline.CalculateBSpline(points.ToList(), 50).ToArray());
                     _data._lineRenderer.Last().SetPositions(points);
                 }
-            }
+            }*/
         }
 
         private Vector3 CalcPosFromUV(BorderPoint i, Vector3 meshCenter)

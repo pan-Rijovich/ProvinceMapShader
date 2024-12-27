@@ -5,7 +5,7 @@ namespace MapBorderRenderer
 {
     public class MapBorderData
     {
-        public readonly Dictionary<Color32, List<HashSet<int>>> BorderPixels = new(5000);
+        public Dictionary<int, BorderPixelsCollection> BorderPixels { get; set; } = new(5000);
         public Dictionary<long, Border> Borders { get; set; } = new();
         public Dictionary<uint, List<long>> ProvincesBorders { get; set; } = new();
         public List<List<BorderPoint>> DeletedLines { get; set; } = new();
@@ -13,7 +13,7 @@ namespace MapBorderRenderer
         public List<LineRenderer> _lineRenderer { get; set; } = new();
 
         public Texture2D Texture { get; private set; }
-        public Color32[] TextureArr { get; private set; }
+        public Color32[] TextureArr { get; set; }
         public int TextureWidth { get; private set; }
         public int TextureHeight { get; private set; }
         public Vector3 MeshSize { get; private set; }
@@ -49,6 +49,35 @@ namespace MapBorderRenderer
                 id = ((long)color1.Color32ToUInt() << 32) + color2.Color32ToUInt();
             }
             return id;
+        }
+        
+        public long GenerateBorderID(int color1, int color2)
+        {
+            long id;
+            if (color1 < color2)
+            {
+                id = ((long)color2 << 32) + color1;
+            }
+            else
+            {
+                id = ((long)color1 << 32) + color2;
+            }
+            return id;
+        }
+        
+        public int Color32ToInt(Color32 color)
+        {
+            return (color.r << 24) | (color.g << 16) | (color.b << 8) | color.a;
+        }
+        
+        public Color32 IntToColor32(int value)
+        {
+            byte r = (byte)((value >> 24) & 0xFF);
+            byte g = (byte)((value >> 16) & 0xFF);
+            byte b = (byte)((value >> 8) & 0xFF);
+            byte a = (byte)(value & 0xFF);
+
+            return new Color32(r, g, b, a);
         }
 
         #region LEGACY

@@ -15,12 +15,7 @@ namespace MapBorderRenderer
 
         public async Task Execute()
         {
-            foreach (var border in _data.Borders.Values)
-            {
-                var temp = border.Points.Distinct().ToList();
-                border.Points.Clear();
-                border.Points.AddRange(temp);
-            }
+            
         }
     }
 }
