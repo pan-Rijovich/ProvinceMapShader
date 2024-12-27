@@ -4,20 +4,12 @@ public struct BorderPoint
 {
     public int X;
     public int Y;
+    public int FromPixelIndex;
+    public int ToPixelIndex;
     //public float UVX;
     //public float UVY;
     public int DebugColor;
 
-    public BorderPoint(int index, int width, int height)
-    {
-        Y = (index / width);
-        X = (index % width);
-        Y = (Y + 1) * 2;
-        X = (X + 1) * 2;
-        DebugColor = 0;
-        //UVY = (index / width) / width;
-        //UVX = (index % width) / height;
-    }
 
     public override bool Equals(object obj)
     {

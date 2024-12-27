@@ -18,7 +18,7 @@ namespace Assets.Scripts
         {
             CheckButtons();
             var mousePos = Input.mousePosition;
-            var ray = Camera.main.ScreenPointToRay(mousePos);
+            var ray = _cam.ScreenPointToRay(mousePos);
             RaycastHit hitInfo;
             if (Physics.Raycast(ray, out hitInfo))
             {
@@ -33,7 +33,7 @@ namespace Assets.Scripts
             var pos = _cam.transform.position;
 
             pos += new Vector3(0, 0, scrollOffset);
-            pos.z = Mathf.Clamp(pos.z, -900f, -15f);
+            pos.z = Mathf.Clamp(pos.z, -900f, -5f);
             _cam.transform.position = pos;
 
 

@@ -31,10 +31,13 @@ namespace MapBorderRenderer
                 var borderPixels = _data.BorderPixels[_data.Color32ToInt(provColor)];
                 
                 Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2) + new Vector3(0.5f, 0.5f);
-                
-                Gizmos.color = Color.magenta;
-                Vector3 pos2 = start + (Vector3)_data.ConvertIndexToPixelCoordinated(_tstI);
-                Gizmos.DrawSphere(pos2, 0.35f);
+
+                if (mode != 0)
+                {
+                    Gizmos.color = Color.magenta;
+                    Vector3 pos2 = start + (Vector3)_data.ConvertIndexToPixelCoordinated(_tstI);
+                    Gizmos.DrawSphere(pos2, 0.35f); 
+                }
                 
                 var counter = 0;
                 foreach (var cluster in borderPixels.Pixels)
@@ -47,6 +50,18 @@ namespace MapBorderRenderer
                         Gizmos.DrawSphere(pos, 0.25f);
                     }
                     counter++;
+                }
+                
+                
+                if (mode != 0)
+                {               
+                    foreach (var index in _handledPixels)
+                    {
+                        Gizmos.color = Color.blue;
+
+                        Vector3 pos = start + (Vector3)_data.ConvertIndexToPixelCoordinated(index);
+                        Gizmos.DrawSphere(pos, 0.15f);
+                    }
                 }
             }
         }
