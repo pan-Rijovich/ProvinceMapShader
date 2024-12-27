@@ -1,53 +1,101 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace MapBorderRenderer
 {
-    public class FilterStraightPointsStep
+    public class FilterStraightPointsStep : IBorderCreationStep
     {
+        private readonly Stopwatch _stopwatch = new();
+        private readonly bool _showExecutionInfo;
         private MapBorderData _data;
+        private HashSet<int> _pointsForDelete = new (100);
+        private int _deletedPointsCount;
+        private BorderPoint _currentPoint;
+        private BorderPoint _previousPoint;
+        private Vector2Int _moveDirection;
 
-        public FilterStraightPointsStep(MapBorderData data)
+        public FilterStraightPointsStep(MapBorderData data, bool showExecutionInfo = false)
         {
             _data = data;
+            _showExecutionInfo = showExecutionInfo;
         }
 
-        public void Execute()
+        public void DrawGizmos(Color32 provColor, Color32 provColor2, int mode) { }
+
+        public async Task Execute()
         {
-/*            var width = _data._provinceTexWidth;
+            _stopwatch.Restart();
 
-            foreach (var br in _data.BordersFloat.Values)
-            {
-                foreach (var b in br)
+            _deletedPointsCount = 0;
+            foreach (var border in _data.Borders.Values)
+            {            
+                foreach (var subBorder in border)
                 {
-                    var border = new List<Float2>();
-
-                    for (int i = 1; i < b.Count - 1; i++)
+                    _pointsForDelete.Clear();
+                    var counter = -1;
+                    
+                    for (var node = subBorder.SortedPoints.First; node.Next != null; node = node.Next)
                     {
-                        int posUp = b[i].positionIndex + width;
-                        int posDown = b[i].positionIndex - width;
-                        int posLeft = b[i].positionIndex - 1;
-                        int posRight = b[i].positionIndex + 1;
-                        var prev = b[i - 1].positionIndex;
-                        var next = b[i + 1].positionIndex;
-                        bool IsHorisontal = prev == posLeft && next == posRight || prev == posRight && next == posLeft;
-                        bool IsVertical = prev == posDown && next == posUp || prev == posUp && next == posDown;
-                        bool IsInnerCorner = true;
-                        bool ISOuterCorner = prev == posDown && next == posRight || prev == posRight && next == posDown;
+                        counter++;
+                        if(node.Previous == null) continue;
+                        if(node.Next == null) continue;
+                        
+                        var previousDirection = GetMoveDirection(node.Previous.Value, node.Value);
+                        var nextDirection = GetMoveDirection(node.Value, node.Next.Value);
 
-                        if (!IsHorisontal && !IsVertical)
+                        if (previousDirection == nextDirection)
                         {
-                            border.Add(b[i]);
+                            _pointsForDelete.Add(counter);
                         }
+                        
                     }
-
-                    border.Insert(0, b[0]);
-                    border.Add(b.Last());
-
-                    b.Clear();
-                    b.AddRange(border);
+                    
+                    counter = -1;
+                    LinkedListNode<BorderPoint> toRemove = null;
+                    
+                    for (var node = subBorder.SortedPoints.First; node.Next != null; node = node.Next)
+                    {
+                        counter++;
+                        
+                        if (_pointsForDelete.Contains(counter))
+                        {
+                            if(toRemove != null) subBorder.SortedPoints.Remove(toRemove);
+                            toRemove = node;
+                            
+                        }
+                        
+                    }
                 }
-            }*/
+                
+                _deletedPointsCount += _pointsForDelete.Count;
+            }
+            
+            _stopwatch.Stop();
+            if(_showExecutionInfo) Debug.Log(GetExecutionInfo());
+            await Task.Yield();
+        }
+        
+        public string GetExecutionInfo()
+        {
+            var msg = $"{GetType().Name} deleted {_deletedPointsCount} points in {_stopwatch.ElapsedMilliseconds} milliseconds";
+            return msg;
+        }
+
+
+        private Vector2Int GetMoveDirection(BorderPoint from, BorderPoint to)
+        {
+            return new (from.X - to.X, from.Y - to.Y);
+        }
+        
+
+        private enum MoveDirection
+        {
+            None,
+            Up, Down, Left, Right, 
+            UpLeft, UpRight, DownRight, DownLeft
         }
     }
 }

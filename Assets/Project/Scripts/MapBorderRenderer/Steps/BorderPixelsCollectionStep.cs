@@ -1,63 +1,73 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace MapBorderRenderer
 {
     public class BorderPixelsCollectionStep : IBorderCreationStep
     {
         private readonly MapBorderData _data;
-        private readonly HashSet<int> _handledPixels = new();
-        private readonly Queue<int> _queue = new(200);
-        private readonly HashSet<int> _queueContainsChecker = new(200);
-        private readonly Color32[] _provinceArr;
+        private HashSet<int> _handledPixels;
+        private Queue<int> _queue;
+        private HashSet<int> _queueContainsChecker;
+        private readonly Stopwatch _stopwatch = new();
         private readonly bool _showExecutionInfo;
-        private readonly int _width;
-        private readonly int _height;
-        private readonly int _length;
+
+        private int _tstI;
 
         public BorderPixelsCollectionStep(MapBorderData data, bool showExecutionInfo = false)
         {
             _data = data;
             _showExecutionInfo = showExecutionInfo;
-            _width = _data.TextureWidth;
-            _height = _data.TextureHeight;
-            _provinceArr = _data.TextureArr;
-            _length = _provinceArr.Length;
         }
 
-        public void DrawGizmos(Color32 provColor)
+        public void DrawGizmos(Color32 provColor, Color32 provColor2, int mode)
         {
-            if (_data.BorderPixels.ContainsKey(provColor))
+            if (_data.BorderPixels.ContainsKey(_data.Color32ToInt(provColor)))
             {
-                var borderPixels = _data.BorderPixels[provColor];
+                var borderPixels = _data.BorderPixels[_data.Color32ToInt(provColor)];
                 
                 Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2) + new Vector3(0.5f, 0.5f);
                 
-                foreach (var border in borderPixels)
+                Gizmos.color = Color.magenta;
+                Vector3 pos2 = start + (Vector3)_data.ConvertIndexToPixelCoordinated(_tstI);
+                Gizmos.DrawSphere(pos2, 0.35f);
+                
+                var counter = 0;
+                foreach (var cluster in borderPixels.Pixels)
                 {
-                    foreach (var index in border)
+                    foreach (var index in cluster)
                     {
                         Gizmos.color = Color.red;
 
                         Vector3 pos = start + (Vector3)_data.ConvertIndexToPixelCoordinated(index);
-                        Gizmos.DrawSphere(pos, 0.35f);
+                        Gizmos.DrawSphere(pos, 0.25f);
                     }
+                    counter++;
                 }
             }
         }
 
         public async Task Execute()
         {
-            for (int i = 0; i < _provinceArr.Length - 1; i++)
+            _handledPixels = new();
+            _queue = new(1024);
+            _queueContainsChecker = new(1024);
+            
+            _stopwatch.Restart();
+            for (int i = 0; i < _data.TextureArr.Length - 1; i++)
             {
                 if (_handledPixels.Contains(i) == false)
                 {
-                    Color32 current = _provinceArr[i];
-                    if(_data.BorderPixels.ContainsKey(current) == false) _data.BorderPixels.Add(current, new List<HashSet<int>>());
+                    int current = _data.Color32ToInt(_data.TextureArr[i]);
+                    
+                    if(_data.BorderPixels.ContainsKey(current) == false) _data.BorderPixels.Add(current, new BorderPixelsCollection(current));
                     var borderPixelsCluster = new HashSet<int>(64);
-                    _data.BorderPixels[current].Add(borderPixelsCluster);
+                    _data.BorderPixels[current].AddCluster(borderPixelsCluster);
+                    
                     _queue.Clear();
                     _queue.Enqueue(i);
                     _queueContainsChecker.Clear();
@@ -65,27 +75,36 @@ namespace MapBorderRenderer
 
                     while (_queue.Count != 0)
                     {
-                        var pixel = _queue.Dequeue();
-                        _queueContainsChecker.Remove(pixel);
-                        _handledPixels.Add(pixel);
+                        var pixelIndex = _queue.Dequeue();
+                        _queueContainsChecker.Remove(pixelIndex);
+                        _handledPixels.Add(pixelIndex);
+                        
+                        
+                        _tstI = pixelIndex; // -----------------------------------
                         
                         var isBorder = false;
-                        var upIndex = _data.GetUpIndex(pixel);
-                        var leftIndex = _data.GetLeftIndex(pixel);
-                        var downIndex = _data.GetDownIndex(pixel);
-                        var rightIndex = _data.GetRightIndex(pixel);
+                        var upIndex = _data.GetUpIndex(pixelIndex);
+                        var leftIndex = _data.GetLeftIndex(pixelIndex);
+                        var downIndex = _data.GetDownIndex(pixelIndex);
+                        var rightIndex = _data.GetRightIndex(pixelIndex);
 
-                        TryAddCollectNeighbourPixel(pixel, upIndex, ref isBorder, borderPixelsCluster);
-                        TryAddCollectNeighbourPixel(pixel, leftIndex, ref isBorder, borderPixelsCluster);
-                        TryAddCollectNeighbourPixel(pixel, downIndex, ref isBorder, borderPixelsCluster);
-                        TryAddCollectNeighbourPixel(pixel, rightIndex, ref isBorder, borderPixelsCluster);
+                        TryAddCollectNeighbourPixel(pixelIndex, upIndex, ref isBorder, borderPixelsCluster);
+                        TryAddCollectNeighbourPixel(pixelIndex, leftIndex, ref isBorder, borderPixelsCluster);
+                        TryAddCollectNeighbourPixel(pixelIndex, downIndex, ref isBorder, borderPixelsCluster);
+                        TryAddCollectNeighbourPixel(pixelIndex, rightIndex, ref isBorder, borderPixelsCluster);
                         
-                        /*переделать в пикселях листы на хешсеты и сделать проверку на наличие в каком-то кластере*/
+                        
+                        await Task.Yield();
                     }
                 }
             }
+            _stopwatch.Stop();
             
             if(_showExecutionInfo) Debug.Log(GetExecutionInfo());
+            
+            _handledPixels = null;
+            _queue = null;
+            _queueContainsChecker = null;
 
             await Task.Yield();
         }
@@ -95,14 +114,16 @@ namespace MapBorderRenderer
             int borderPixelsCount = 0;
             foreach (var border in _data.BorderPixels.Values)
             {
-                foreach (var subborder in border)
+                foreach (var subborder in border.Pixels)
                 {
                     borderPixelsCount += subborder.Count;
                 }
             }
             
-            var msg = $"{GetType()} handled {_handledPixels.Count} pixels";
+            var msg = $"{GetType().Name} handled {_handledPixels.Count} pixels";
             msg += $" and collected {borderPixelsCount} border pixels";
+            msg += $" for {_data.BorderPixels.Count} colors";
+            msg += $" in {_stopwatch.ElapsedMilliseconds} milliseconds";
             
             return msg;
         }
@@ -111,10 +132,10 @@ namespace MapBorderRenderer
         {
             if(_queueContainsChecker.Contains(neighbourPixel)) return;
             
-            var colorFrom = _provinceArr[pixel];
-            var colorTo = _provinceArr[neighbourPixel];
+            var colorFrom = _data.Color32ToInt(_data.TextureArr[pixel]);
+            var colorTo = _data.Color32ToInt(_data.TextureArr[neighbourPixel]);
             
-            if (colorFrom.CompareRGB(colorTo))
+            if (colorFrom == colorTo)
             {
                 if (_handledPixels.Contains(neighbourPixel)) return;
                 
