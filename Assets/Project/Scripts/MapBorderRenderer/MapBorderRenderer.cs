@@ -13,6 +13,7 @@ namespace MapBorderRenderer
         [SerializeField] private Color32 _debugProvince;
         [SerializeField] private Color32 _oldDebugProvince;
         [SerializeField, Range(0, 3)] private int _debugMode = 0;
+        [SerializeField, Range(0, 5)] private int _debugStep = 0;
 
         private List<IBorderCreationStep> _steps = new(10);
         private MapBorderData _data;
@@ -40,8 +41,9 @@ namespace MapBorderRenderer
         {
             if(!Application.isPlaying) return;
             if(_steps.Count == 0) return;
+            if(_debugStep > _steps.Count - 1)return;
             
-            var step = _steps[1];
+            var step = _steps[_debugStep];
             step?.DrawGizmos(_debugProvince, _oldDebugProvince, _debugMode);
             
         }

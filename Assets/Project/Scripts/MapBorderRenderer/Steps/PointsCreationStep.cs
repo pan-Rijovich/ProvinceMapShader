@@ -178,6 +178,8 @@ namespace MapBorderRenderer
             point.Y = (fromIndex / width);
             point.X = (point.X) * 2 + 1;
             point.Y = (point.Y) * 2 + 1;
+            point.FromPixelIndex = fromIndex;
+            point.ToPixelIndex = toIndex;
             
             if(difference == width) //up
             {
@@ -284,15 +286,7 @@ namespace MapBorderRenderer
             {
                 _data.BorderPixels[neighborColor].TryGetClusterNumberForPixelIndex(neighborPixelIndex, out var neighborClusterIndex);
 
-                if (neighborClusterIndex == -1)
-                {
-                    //Debug.Log("Try to get neighborClusterIndex, that can not get cluster numbers");
-                    return false;
-                }
-                else
-                {
-                    
-                }
+                if (neighborClusterIndex == -1) return false;
                 
                 
                 if (_fromColor == neighborColor && _fromClusterIndex != neighborClusterIndex)

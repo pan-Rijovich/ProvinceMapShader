@@ -32,20 +32,24 @@ namespace MapBorderRenderer
             {
                 Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2);// + new Vector3(0.5f, 0.5f);
                 
-                foreach (var point in _zeroStartPoints)
-                {
-                    Gizmos.color = new Color(0f, 0.5f, 1f);
-                        
-                    Vector3 pos = start + new Vector3(point.X / 2f, point .Y / 2f);
-                    Gizmos.DrawSphere(pos, 0.45f);
-                                             
-                                         
-                }
                 
                 foreach (var subborder in border)
                 {
                     var colorStep = 1f / subborder.SortedPoints.Count;
                     var color = 1f;
+
+                    if (mode != 0)
+                    {
+                        Gizmos.color = Color.green;
+                        var edgePoint = subborder.SortedPoints.First;
+                        var position = start + new Vector3(edgePoint.Value.X / 2f, edgePoint.Value.Y / 2f);
+                        Gizmos.DrawSphere(position, 0.25f);
+                    
+                        Gizmos.color = Color.magenta;
+                        edgePoint = subborder.SortedPoints.Last;
+                        position = start + new Vector3(edgePoint.Value.X / 2f, edgePoint.Value.Y / 2f);
+                        Gizmos.DrawSphere(position, 0.25f);
+                    }
                     
                     foreach (var point in subborder.SortedPoints)
                     {
@@ -55,17 +59,6 @@ namespace MapBorderRenderer
                         Vector3 pos = start + new Vector3(point.X / 2f, point .Y / 2f);
                         Gizmos.DrawSphere(pos, 0.15f);
                     }
-
-                    
-                    Gizmos.color = Color.green;
-                    var edgePoint = subborder.SortedPoints.First;
-                    var position = start + new Vector3(edgePoint.Value.X / 2f, edgePoint.Value.Y / 2f);
-                    Gizmos.DrawSphere(position, 0.25f);
-                    
-                    Gizmos.color = Color.magenta;
-                    edgePoint = subborder.SortedPoints.Last;
-                    position = start + new Vector3(edgePoint.Value.X / 2f, edgePoint.Value.Y / 2f);
-                    Gizmos.DrawSphere(position, 0.25f);
                 }
             }
         }
@@ -84,15 +77,15 @@ namespace MapBorderRenderer
 
 
                     var neighbors = GetNeighbors(_startPoint);
-                    //if(neighbors.Count > 2) Debug.LogError($"Point has {neighbors.Count} neighbors");
+                    //if(neighbors.Count > 3) Debug.LogError($"Point has {neighbors.Count} neighbors in X {_startPoint.X}     Y {_startPoint.Y}");
 
 
-                    if (neighbors.Count == 0)
+                    /*if (neighbors.Count == 0)
                     {
                         _zeroStartPoints.Add(_startPoint);
                         Debug.LogError($"Zero Start Point in X {_startPoint.X}     Y {_startPoint.Y}");
                         continue;
-                    }
+                    }*/
                     
                     _currentPoint = neighbors[0];
                     
