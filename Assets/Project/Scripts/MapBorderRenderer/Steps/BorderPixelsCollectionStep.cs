@@ -94,7 +94,7 @@ namespace MapBorderRenderer
                         TryAddCollectNeighbourPixel(pixelIndex, rightIndex, ref isBorder, borderPixelsCluster);
                         
                         
-                        await Task.Yield();
+                        //await Task.Yield(); // -----------------------------------
                     }
                 }
             }
