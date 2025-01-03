@@ -76,6 +76,12 @@ namespace MapBorderRenderer
                 }
             }
         }
+        
+        public string GetExecutionInfo()
+        {
+            var msg = $"{GetType().Name} executed in {_stopwatch.ElapsedMilliseconds} milliseconds";
+            return msg;
+        }
 
         public async Task Execute()
         {
@@ -143,6 +149,7 @@ namespace MapBorderRenderer
                     }
                     
                     //check on cycle border condition
+                    CheckSubBorderCycling(subBorder);
                 }
             }
             
@@ -154,10 +161,50 @@ namespace MapBorderRenderer
             await Task.Yield();
         }
         
-        public string GetExecutionInfo()
+        public void CheckSubBorderCycling(SubBorder subBorder)
         {
-            var msg = $"{GetType().Name} executed in {_stopwatch.ElapsedMilliseconds} milliseconds";
-            return msg;
+            if(subBorder.SortedPointsLists.Count > 1) return;
+            
+            var startPoint = subBorder.SortedPointsLists[0].First();
+            var endPoint = subBorder.SortedPointsLists[0].Last();
+            
+            if (startPoint.IsEdgePoint == false)
+            {
+                if (startPoint + new Vector2Int(1, 0) == endPoint) subBorder.IsCycled = true;
+                if (startPoint + new Vector2Int(0, 1) == endPoint) subBorder.IsCycled = true;
+                if (startPoint + new Vector2Int(-1, 0) == endPoint) subBorder.IsCycled = true;
+                if (startPoint + new Vector2Int(0, -1) == endPoint) subBorder.IsCycled = true;
+                
+                
+                if (startPoint + new Vector2Int(1, 1) == endPoint) subBorder.IsCycled = true;
+                if (startPoint + new Vector2Int(1, -1) == endPoint) subBorder.IsCycled = true;
+                if (startPoint + new Vector2Int(-1, 1) == endPoint) subBorder.IsCycled = true;
+                if (startPoint + new Vector2Int(-1, -1) == endPoint) subBorder.IsCycled = true;
+
+                if (startPoint + new Vector2Int(2, 0) == endPoint)
+                {
+                    if(CalculateParentOffset(startPoint, endPoint) == 1) subBorder.IsCycled = true;
+                }
+                if (startPoint + new Vector2Int(0, 2) == endPoint) 
+                {
+                    if(CalculateParentOffset(startPoint, endPoint) == 1) subBorder.IsCycled = true;
+                }
+                if (startPoint + new Vector2Int(-2, 0) == endPoint) 
+                {
+                    if(CalculateParentOffset(startPoint, endPoint) == 1) subBorder.IsCycled = true;
+                }
+                if (startPoint + new Vector2Int(0, -2) == endPoint) 
+                {
+                    if(CalculateParentOffset(startPoint, endPoint) == 1) subBorder.IsCycled = true;
+                }
+            }
+            else
+            {
+                if (startPoint + new Vector2Int(1, 0) == endPoint) subBorder.IsCycled = true;
+                if (startPoint + new Vector2Int(0, 1) == endPoint) subBorder.IsCycled = true;
+                if (startPoint + new Vector2Int(-1, 0) == endPoint) subBorder.IsCycled = true;
+                if (startPoint + new Vector2Int(0, -1) == endPoint) subBorder.IsCycled = true;
+            }
         }
 
         private BorderPoint GetMostPriorityNeighborPoint(BorderPoint currentPoint)

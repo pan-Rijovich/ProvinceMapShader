@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -63,17 +64,22 @@ namespace MapBorderRenderer
             line.name = $"Border ID:{id}   С1:{subBorder.ClusterIndexForColor1} С2:{subBorder.ClusterIndexForColor2} ";
             
             Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2);
-            Vector3[] array = new Vector3[points.Count];
+            Vector3[] linePoints = new Vector3[points.Count];
             var counter = 0;
             
             foreach (var point in points)
             {
-                array[counter] = start + new Vector3(point.X / 2f, point.Y / 2f, -0.002f); // -0.35f
+                linePoints[counter] = start + new Vector3(point.X / 2f, point.Y / 2f, -0.002f); // -0.35f
                 counter++;
                 _borderPointsCounter++;
             }
-            line.positionCount = array.Length;
-            line.SetPositions(array);
+
+            line.positionCount = linePoints.Length * 2;
+            line.SetPositions(BSpline.CalculateBSpline(linePoints.ToList(), line.positionCount).ToArray());
+            //line.positionCount = array.Length;
+            //line.SetPositions(array);
+            
+            line.loop = subBorder.IsCycled;
             subBorder.Lines.Add(line);
         }
     }
