@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class SubBorder : IEnumerable<BorderPoint>
 {
-    public readonly HashSet<BorderPoint> UnsortedPoints = new(8);
-    public readonly LinkedList<BorderPoint> SortedPoints = new();
-    public int Color1{ get; set; }
-    public int Color2 { get; set; }
+    public HashSet<BorderPoint> UnsortedPoints = new(8);
+    public List<LinkedList<BorderPoint>> SortedPointsLists = new();
+    public List<LineRenderer> Lines = new();
+    public readonly int Color1;
+    public readonly int Color2;
     public readonly int ClusterIndexForColor1;
     public readonly int ClusterIndexForColor2;
     public readonly int HashID;
@@ -32,6 +33,8 @@ public class SubBorder : IEnumerable<BorderPoint>
         if (obj.GetType() == typeof(SubBorder) == false) return false;
 
         var other = (SubBorder)obj;
+        
+        //return HashID == other.HashID;
         return Color1.Equals(other.Color1) && Color2.Equals(other.Color2) && 
                ClusterIndexForColor1 == other.ClusterIndexForColor1 && 
                ClusterIndexForColor2 == other.ClusterIndexForColor2;
