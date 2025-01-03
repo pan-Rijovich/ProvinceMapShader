@@ -242,10 +242,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68bbfc4b689c6064da128dc3fedcd81b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Remap: {fileID: 0}
   targetColor:
     serializedVersion: 2
     rgba: 4278190335
+  computeShader: {fileID: 0}
+  remapTex: {fileID: 0}
 --- !u!114 &148709084
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5661,13 +5662,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1579355028}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -123.23467, y: 50.09819, z: 140.18158}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: -0.7071068, w: 0}
+  m_LocalPosition: {x: -123.51, y: 370.3, z: 140.18158}
+  m_LocalScale: {x: 563, y: 1, z: 204}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 180, z: 0}
 --- !u!1 &1778229113
 GameObject:
   m_ObjectHideFlags: 0
@@ -5704,10 +5705,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68bbfc4b689c6064da128dc3fedcd81b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Remap: {fileID: 2800000, guid: c6302d5a4b9fd304bb38d7d1b1cfa9e0, type: 3}
   targetColor:
     serializedVersion: 2
     rgba: 2184722488
+  computeShader: {fileID: 7200000, guid: 8effc7b427f6937439e03a5a564ce8d7, type: 3}
+  remapTex: {fileID: 0}
 --- !u!114 &1778229115
 MonoBehaviour:
   m_ObjectHideFlags: 0
