@@ -131,7 +131,7 @@ namespace MapBorderRenderer
                 return;
             }
 
-            var subBorder = GetSubBorder(border, _fromClusterIndex, _toClusterIndex);
+            var subBorder = GetSubBorder(border, _fromColor, _toColor,_fromClusterIndex, _toClusterIndex);
             var point = GetBorderPoint(_fromPixelIndex, _toPixelIndex);
             subBorder.AddPoint(point);
 
@@ -156,8 +156,15 @@ namespace MapBorderRenderer
             return border;
         }
 
-        private SubBorder GetSubBorder(Border border, int color1ClusterIndex, int color2ClusterIndex)
+        private SubBorder GetSubBorder(Border border, int color1, int color2, int color1ClusterIndex, int color2ClusterIndex)
         {
+            if (border.Color1 == color2)
+            {
+                var tmp = color1ClusterIndex;
+                color1ClusterIndex = color2ClusterIndex;
+                color2ClusterIndex = tmp;
+            }
+            
             if (border.TryGetSubBorder(color1ClusterIndex, color2ClusterIndex, out var subBorder))
             {
                 return subBorder;
@@ -221,6 +228,7 @@ namespace MapBorderRenderer
             if (neighborComparision || diagonalNeighborComparision)
             {
                 var edgePoint = point + Vector2Int.left;
+                edgePoint.IsEdgePoint = true;
                 edgePoint.DebugColor = 4;
                 subBorder.AddPoint(edgePoint);
             }
@@ -237,6 +245,7 @@ namespace MapBorderRenderer
             if (neighborComparision || diagonalNeighborComparision)
             {
                 var edgePoint = point + Vector2Int.right;
+                edgePoint.IsEdgePoint = true;
                 edgePoint.DebugColor = 4;
                 subBorder.AddPoint(edgePoint);
             }
@@ -256,6 +265,7 @@ namespace MapBorderRenderer
             if (neighborComparision || diagonalNeighborComparision)
             {
                 var edgePoint = point + Vector2Int.up;
+                edgePoint.IsEdgePoint = true;
                 edgePoint.DebugColor = 4;
                 subBorder.AddPoint(edgePoint);
             }
@@ -271,6 +281,7 @@ namespace MapBorderRenderer
             if (neighborComparision || diagonalNeighborComparision)
             {
                 var edgePoint = point + Vector2Int.down;
+                edgePoint.IsEdgePoint = true;
                 edgePoint.DebugColor = 4;
                 subBorder.AddPoint(edgePoint);
             }

@@ -21,6 +21,7 @@ namespace Assets.Scripts.Utils
         [ContextMenu("GoToTargetPixelCoordinates")]
         private void GoToTargetPixelCoordinates()
         {
+            _cam ??= Camera.main;
             var z = _cam.transform.position.z;
             var target = _startPoint + new Vector2(_targetPixelCoordinates.x, _targetPixelCoordinates.y);
             _cam.transform.position = new(target.x, target.y, z);
@@ -29,7 +30,7 @@ namespace Assets.Scripts.Utils
         [ContextMenu("GoToTargetHalfPixelCoordinates")]
         private void GoToTargetHalfPixelCoordinates()
         {
-            
+            _cam ??= Camera.main;
             var z = _cam.transform.position.z;
             var target = _startPoint + new Vector2(_targetHalfPixelCoordinates.x / 2f, _targetHalfPixelCoordinates.y / 2f);
             _cam.transform.position = new(target.x, target.y, z);
@@ -37,10 +38,12 @@ namespace Assets.Scripts.Utils
         [ContextMenu("GoToTargetIndex")]
         private void GoToTargetIndex()
         {
+            _cam ??= Camera.main;
             var z = _cam.transform.position.z;
             var coordinates = new Vector2(_targetIndex % _mapSize.x, _targetIndex / _mapSize.x);
             var target = _startPoint + coordinates;
             _cam.transform.position = new(target.x, target.y, z);
+            Debug.Log(coordinates);
         }
         
     }

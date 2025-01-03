@@ -8,6 +8,7 @@ public struct BorderPoint
     public int ToPixelIndex;
     //public float UVX;
     //public float UVY;
+    public bool IsEdgePoint;
     public int DebugColor;
 
 

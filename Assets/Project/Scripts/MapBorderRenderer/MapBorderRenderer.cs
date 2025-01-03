@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,16 +8,19 @@ namespace MapBorderRenderer
 {
     public class MapBorderRenderer : MonoBehaviour
     {
-        [SerializeField] bool _showExecutionInfo = false;
         [SerializeField] private LineRenderer _lineRendererPrefab;
-        [SerializeField] private LineRenderer _lineRendererTST;
-        [SerializeField] private Color32 _debugProvince;
-        [SerializeField] private Color32 _oldDebugProvince;
+        [SerializeField] private Transform _lineContainer;
+        [SerializeField] public Color32 _debugProvince;
+        [SerializeField] public Color32 _oldDebugProvince;
         [SerializeField, Range(0, 3)] private int _debugMode = 0;
         [SerializeField, Range(0, 5)] private int _debugStep = 0;
+        [SerializeField] bool _showDebug = false;
+        [SerializeField] bool _showExecutionInfo = false;
 
-        private List<IBorderCreationStep> _steps = new(10);
-        private MapBorderData _data;
+        public List<IBorderCreationStep> _steps = new(10);
+        public MapBorderData _data;
+        
+        public event Action OnInitialized;
         
 
         private async void Start()
@@ -28,13 +32,16 @@ namespace MapBorderRenderer
                 new BorderPixelsCollectionStep(_data, _showExecutionInfo),
                 new PointsCreationStep(_data, _showExecutionInfo),
                 new SortPointsStep(_data, _showExecutionInfo),
-                //new FilterStraightPointsStep(_data, _showExecutionInfo),
+                new FilterStraightPointsStep(_data, _showExecutionInfo),
+                new DrawStep(_data, _lineRendererPrefab, _lineContainer, _showExecutionInfo),
             };
 
             foreach(var step in _steps)
             {
                 await step.Execute();
             }
+            
+            OnInitialized?.Invoke();
         }
 
         private void OnDrawGizmos()
@@ -42,6 +49,7 @@ namespace MapBorderRenderer
             if(!Application.isPlaying) return;
             if(_steps.Count == 0) return;
             if(_debugStep > _steps.Count - 1)return;
+            if(_showDebug == false) return;
             
             var step = _steps[_debugStep];
             step?.DrawGizmos(_debugProvince, _oldDebugProvince, _debugMode);
@@ -70,22 +78,7 @@ namespace MapBorderRenderer
         [ContextMenu("TST")]
         private void TST()
         { 
-            Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2);
-            var id = _data.GenerateBorderID(_debugProvince, _oldDebugProvince);
-            if (_data.Borders.TryGetValue(id, out var border))
-            {
-                var subborder = border[0];
-                Vector3[] array = new Vector3[subborder.SortedPoints.Count];
-                var i = 0;
-                for (var point = subborder.SortedPoints.First; point.Next != null; point = point.Next)
-                {
-                    array[i] = start + new Vector3(point.Value.X / 2f, point.Value.Y / 2f, -0.001f);
-                    i++;
-                }
-                
-                _lineRendererTST.positionCount = array.Length;
-                _lineRendererTST.SetPositions(array);
-            }
+            
             
         }
     }

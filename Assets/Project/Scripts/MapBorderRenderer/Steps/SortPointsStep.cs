@@ -13,11 +13,11 @@ namespace MapBorderRenderer
         private readonly bool _showExecutionInfo;
         private readonly MapBorderData _data;
         private HashSet<BorderPoint> _unsortedPoints;
-        private LinkedList<BorderPoint> _points;
+        //private LinkedList<BorderPoint> _points;
         private BorderPoint _startPoint;
         private BorderPoint _currentPoint;
         private BorderPoint _previousPoint;
-        private List<BorderPoint> _zeroStartPoints = new();
+        private List<BorderPoint> _ = new();
 
         public SortPointsStep(MapBorderData data, bool showExecutionInfo = false)
         {
@@ -35,30 +35,44 @@ namespace MapBorderRenderer
                 
                 foreach (var subborder in border)
                 {
-                    var colorStep = 1f / subborder.SortedPoints.Count;
-                    var color = 1f;
 
                     if (mode != 0)
                     {
-                        Gizmos.color = Color.green;
-                        var edgePoint = subborder.SortedPoints.First;
-                        var position = start + new Vector3(edgePoint.Value.X / 2f, edgePoint.Value.Y / 2f);
-                        Gizmos.DrawSphere(position, 0.25f);
+                        foreach (var list in subborder.SortedPointsLists)
+                        {
+                            Gizmos.color = Color.green;
+                            var edgePoint = list.First;
+                            var position = start + new Vector3(edgePoint.Value.X / 2f, edgePoint.Value.Y / 2f);
+                            Gizmos.DrawSphere(position, 0.25f);
                     
-                        Gizmos.color = Color.magenta;
-                        edgePoint = subborder.SortedPoints.Last;
-                        position = start + new Vector3(edgePoint.Value.X / 2f, edgePoint.Value.Y / 2f);
-                        Gizmos.DrawSphere(position, 0.25f);
-                    }
-                    
-                    foreach (var point in subborder.SortedPoints)
-                    {
-                        color -= colorStep;
-                        Gizmos.color = new Color(color, 0f, 0f);
+                            Gizmos.color = Color.magenta;
+                            edgePoint = list.Last;
+                            position = start + new Vector3(edgePoint.Value.X / 2f, edgePoint.Value.Y / 2f);
+                            Gizmos.DrawSphere(position, 0.25f);
+                            
+                            if (mode == 2) break;
+                        }
                         
-                        Vector3 pos = start + new Vector3(point.X / 2f, point .Y / 2f);
-                        Gizmos.DrawSphere(pos, 0.15f);
                     }
+                    
+                    foreach (var list in subborder.SortedPointsLists)
+                    {
+                        var colorStep = 1f / list.Count;
+                        var color = 1f;
+                        
+                        foreach (var point in list)
+                        {
+                            color -= colorStep;
+                            Gizmos.color = new Color(color, 0f, 0f);
+                        
+                            Vector3 pos = start + new Vector3(point.X / 2f, point .Y / 2f);
+                            Gizmos.DrawSphere(pos, 0.15f);
+                        }
+                        
+                        
+                    }
+                    
+                    if (mode == 2) break;
                 }
             }
         }
@@ -70,69 +84,65 @@ namespace MapBorderRenderer
             {            
                 foreach (var subBorder in border)
                 {
-                    _points = subBorder.SortedPoints;
                     _unsortedPoints = subBorder.UnsortedPoints;
-                    _startPoint = _previousPoint = _currentPoint = subBorder.UnsortedPoints.First();
-                    _points.AddLast(_currentPoint);
 
-
-                    var neighbors = GetNeighbors(_startPoint);
-                    //if(neighbors.Count > 3) Debug.LogError($"Point has {neighbors.Count} neighbors in X {_startPoint.X}     Y {_startPoint.Y}");
-
-
-                    /*if (neighbors.Count == 0)
+                    while (subBorder.UnsortedPoints.Count > 0)
                     {
-                        _zeroStartPoints.Add(_startPoint);
-                        Debug.LogError($"Zero Start Point in X {_startPoint.X}     Y {_startPoint.Y}");
-                        continue;
-                    }*/
-                    
-                    _currentPoint = neighbors[0];
-                    
-                    for (int i = 0; i < subBorder.UnsortedPoints.Count; i++)
-                    {
-                        if (TryAddPointAsLast(new Vector2Int(1, 1))) continue;
-                        if (TryAddPointAsLast(new Vector2Int(1, -1))) continue;
-                        if (TryAddPointAsLast(new Vector2Int(-1, 1))) continue;
-                        if (TryAddPointAsLast(new Vector2Int(-1, -1))) continue;
-
-                        if (TryAddPointAsLast(new Vector2Int(2, 0))) continue;
-                        if (TryAddPointAsLast(new Vector2Int(0, 2))) continue;
-                        if (TryAddPointAsLast(new Vector2Int(-2, 0))) continue;
-                        if (TryAddPointAsLast(new Vector2Int(0, -2))) continue;
-
-                        if (TryAddPointAsLast(new Vector2Int(1, 0))) continue;
-                        if (TryAddPointAsLast(new Vector2Int(0, 1))) continue;
-                        if (TryAddPointAsLast(new Vector2Int(-1, 0))) continue;
-                        if (TryAddPointAsLast(new Vector2Int(0, -1))) continue;
-                    }
-
-
-                    if (neighbors.Count > 1)
-                    {
-                        _currentPoint = neighbors[1];
-                        _previousPoint = _startPoint;
-                    
-                        for (int i = 0; i < subBorder.UnsortedPoints.Count; i++)
+                        var list = new LinkedList<BorderPoint>();
+                        subBorder.SortedPointsLists.Add(list);
+                        
+                        if (subBorder.UnsortedPoints.Count == 2)
                         {
-                            if (TryAddPointAsFirst(new Vector2Int(1, 1))) continue;
-                            if (TryAddPointAsFirst(new Vector2Int(1, -1))) continue;
-                            if (TryAddPointAsFirst(new Vector2Int(-1, 1))) continue;
-                            if (TryAddPointAsFirst(new Vector2Int(-1, -1))) continue;
-
-                            if (TryAddPointAsFirst(new Vector2Int(2, 0))) continue;
-                            if (TryAddPointAsFirst(new Vector2Int(0, 2))) continue;
-                            if (TryAddPointAsFirst(new Vector2Int(-2, 0))) continue;
-                            if (TryAddPointAsFirst(new Vector2Int(0, -2))) continue;
-
-                            if (TryAddPointAsFirst(new Vector2Int(1, 0))) continue;
-                            if (TryAddPointAsFirst(new Vector2Int(0, 1))) continue;
-                            if (TryAddPointAsFirst(new Vector2Int(-1, 0))) continue;
-                            if (TryAddPointAsFirst(new Vector2Int(0, -1))) continue;
+                            _startPoint = _previousPoint;
                         }
+                        if (subBorder.UnsortedPoints.Count  == 1)
+                        {
+                            _startPoint = _previousPoint;
+                        }
+                        
+                        _startPoint = _previousPoint = _currentPoint = subBorder.UnsortedPoints.First();
+                        list.AddFirst(_currentPoint);
+                        _unsortedPoints.Remove(_currentPoint);
+                        
+                        //for (int i = 0; i < subBorder.UnsortedPoints.Count; i++)
+                        while (subBorder.UnsortedPoints.Count > 0)
+                        {
+                            _currentPoint = GetMostPriorityNeighborPoint(_currentPoint);
+                            if (_currentPoint == _previousPoint)
+                            {
+                                break;
+                            }
+                            list.AddFirst(_currentPoint);
+                            _unsortedPoints.Remove(_currentPoint);
+                            _previousPoint = _currentPoint;
+                        }
+                        
+                        _currentPoint = GetMostPriorityNeighborPoint(_startPoint);
+                        if (_currentPoint == _startPoint)
+                        {
+                            break;
+                        }
+                        list.AddLast(_currentPoint);
+                        _unsortedPoints.Remove(_currentPoint);
+                        
+                        //for (int i = 0; i < subBorder.UnsortedPoints.Count; i++)
+                        while (subBorder.UnsortedPoints.Count > 0)
+                        {
+                            _currentPoint = GetMostPriorityNeighborPoint(_currentPoint);
+                            if (_currentPoint == _previousPoint)
+                            {
+                                break;
+                            }
+                            list.AddLast(_currentPoint);
+                            _unsortedPoints.Remove(_currentPoint);
+                            _previousPoint = _currentPoint;
+                        }
+                        
+                        
+                        //await Task.Yield();
                     }
                     
-                    
+                    //check on cycle border condition
                 }
             }
             
@@ -150,50 +160,63 @@ namespace MapBorderRenderer
             return msg;
         }
 
-        private List<BorderPoint> GetNeighbors(BorderPoint startPoint)
+        private BorderPoint GetMostPriorityNeighborPoint(BorderPoint currentPoint)
         {
-            var neighbors = new List<BorderPoint>();
+            BorderPoint result;
+            if (currentPoint.IsEdgePoint == false)
+            {
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(1, 0), out result)) return result;
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(0, 1), out result)) return result;
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(-1, 0), out result)) return result;
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(0, -1), out result)) return result;
+                
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(1, 1), out result)) return result;
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(1, -1), out result)) return result;
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(-1, 1), out result)) return result;
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(-1, -1), out result)) return result;
+
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(2, 0), out result))
+                {
+                    if(CalculateParentOffset(currentPoint, result) == 1) return result;
+                    
+                }
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(0, 2), out result)) 
+                {
+                    if(CalculateParentOffset(currentPoint, result) == 1) return result;
+                    
+                }
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(-2, 0), out result)) 
+                {
+                    if(CalculateParentOffset(currentPoint, result) == 1) return result;
+                    
+                }
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(0, -2), out result)) 
+                {
+                    if(CalculateParentOffset(currentPoint, result) == 1) return result;
+                }
+            }
+            else
+            {
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(1, 0), out result)) return result;
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(0, 1), out result)) return result;
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(-1, 0), out result)) return result;
+                if (_unsortedPoints.TryGetValue(currentPoint + new Vector2Int(0, -1), out result)) return result;
+            }
+            result = currentPoint;
+            return result;
+        }
+
+        private int CalculateParentOffset(BorderPoint currentPoint, BorderPoint offsetPoint)
+        {
+            var currentFrom = _data.ConvertIndexToIntPixelCoordinated(currentPoint.FromPixelIndex);
+            var currentTo = _data.ConvertIndexToIntPixelCoordinated(currentPoint.ToPixelIndex);
+            var offsetFrom = _data.ConvertIndexToIntPixelCoordinated(offsetPoint.FromPixelIndex);
+            var offsetTo = _data.ConvertIndexToIntPixelCoordinated(offsetPoint.ToPixelIndex);
             
-            if (_unsortedPoints.Contains(startPoint + new Vector2Int(1, 1))) neighbors.Add(startPoint + new Vector2Int(1, 1));
-            if (_unsortedPoints.Contains(startPoint + new Vector2Int(1, -1))) neighbors.Add(startPoint + new Vector2Int(1, -1));
-            if (_unsortedPoints.Contains(startPoint + new Vector2Int(-1, 1))) neighbors.Add(startPoint + new Vector2Int(-1, 1));
-            if (_unsortedPoints.Contains(startPoint + new Vector2Int(-1, -1))) neighbors.Add(startPoint + new Vector2Int(-1, -1));
-
-            if (_unsortedPoints.Contains(startPoint + new Vector2Int(2, 0))) neighbors.Add(startPoint + new Vector2Int(2, 0));
-            if (_unsortedPoints.Contains(startPoint + new Vector2Int(0, 2))) neighbors.Add(startPoint + new Vector2Int(0, 2));
-            if (_unsortedPoints.Contains(startPoint + new Vector2Int(-2, 0))) neighbors.Add(startPoint + new Vector2Int(-2, 0));
-            if (_unsortedPoints.Contains(startPoint + new Vector2Int(0, -2))) neighbors.Add(startPoint + new Vector2Int(0, -2));
-
-            if (_unsortedPoints.Contains(startPoint + new Vector2Int(1, 0))) neighbors.Add(startPoint + new Vector2Int(1, 1));
-            if (_unsortedPoints.Contains(startPoint + new Vector2Int(0, 1))) neighbors.Add(startPoint + new Vector2Int(1, 1));
-            if (_unsortedPoints.Contains(startPoint + new Vector2Int(-1, 0))) neighbors.Add(startPoint + new Vector2Int(-1, 0));
-            if (_unsortedPoints.Contains(startPoint + new Vector2Int(0, -1))) neighbors.Add(startPoint + new Vector2Int(-1, 0));
-
-            return neighbors;
-        }
-        
-        private bool TryAddPointAsLast(Vector2Int offset)
-        {
-            if (_currentPoint + offset != _previousPoint && _unsortedPoints.TryGetValue(_currentPoint + offset, out var point))
-            {
-                _points.AddLast(point);
-                _previousPoint = _currentPoint;
-                _currentPoint = point;
-                return true;
-            }
-            return false;
-        }
-        
-        private bool TryAddPointAsFirst(Vector2Int offset)
-        {
-            if (_currentPoint + offset != _previousPoint && _unsortedPoints.TryGetValue(_currentPoint + offset, out var point))
-            {
-                _points.AddFirst(point);
-                _previousPoint = _currentPoint;
-                _currentPoint = point;
-                return true;
-            }
-            return false;
+            var xDifference = currentFrom.x - offsetFrom.x;
+            var yDifference = currentTo.y - offsetTo.y;
+            
+            return Mathf.Max(Mathf.Abs(xDifference), Mathf.Abs(yDifference));
         }
     }
 }

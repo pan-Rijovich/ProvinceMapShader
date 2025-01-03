@@ -501,14 +501,14 @@ public class BorderShower : MonoBehaviour
                 Vector3[] points = new Vector3[b.Count];
                 for (int i = 0; i < b.Count; i++) 
                 {
-                    points[i] = CalcPosFromUV(b[i], transform.position) + new Vector3(0, 0, -0.01f);
+                    points[i] = CalcPosFromUV(b[i], transform.position) + new Vector3(0, 0, -0.3f);
                 }
 
                 var pointCount = points.Length * 2;
-                _lineRenderer.Last().positionCount = pointCount;
-                _lineRenderer.Last().SetPositions(BSpline.CalculateBSpline(points.ToList(), pointCount).ToArray());
-                //_lineRenderer.Last().positionCount = points.Length;
-                //_lineRenderer.Last().SetPositions(points);
+                //_lineRenderer.Last().positionCount = pointCount;
+                //_lineRenderer.Last().SetPositions(BSpline.CalculateBSpline(points.ToList(), pointCount).ToArray());
+                _lineRenderer.Last().positionCount = points.Length;
+                _lineRenderer.Last().SetPositions(points);
             }
         }
     }

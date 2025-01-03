@@ -24,6 +24,12 @@ namespace MapBorderRenderer
         }
 
         public void DrawGizmos(Color32 provColor, Color32 provColor2, int mode) { }
+        
+        public string GetExecutionInfo()
+        {
+            var msg = $"{GetType().Name} deleted {_deletedPointsCount} points in {_stopwatch.ElapsedMilliseconds} milliseconds";
+            return msg;
+        }
 
         public async Task Execute()
         {
@@ -34,39 +40,9 @@ namespace MapBorderRenderer
             {            
                 foreach (var subBorder in border)
                 {
-                    _pointsForDelete.Clear();
-                    var counter = -1;
-                    
-                    for (var node = subBorder.SortedPoints.First; node.Next != null; node = node.Next)
+                    foreach (var list in subBorder.SortedPointsLists)
                     {
-                        counter++;
-                        if(node.Previous == null) continue;
-                        if(node.Next == null) continue;
-                        
-                        var previousDirection = GetMoveDirection(node.Previous.Value, node.Value);
-                        var nextDirection = GetMoveDirection(node.Value, node.Next.Value);
-
-                        if (previousDirection == nextDirection)
-                        {
-                            _pointsForDelete.Add(counter);
-                        }
-                        
-                    }
-                    
-                    counter = -1;
-                    LinkedListNode<BorderPoint> toRemove = null;
-                    
-                    for (var node = subBorder.SortedPoints.First; node.Next != null; node = node.Next)
-                    {
-                        counter++;
-                        
-                        if (_pointsForDelete.Contains(counter))
-                        {
-                            if(toRemove != null) subBorder.SortedPoints.Remove(toRemove);
-                            toRemove = node;
-                            
-                        }
-                        
+                        DeletePointsInList(list);
                     }
                 }
                 
@@ -77,11 +53,43 @@ namespace MapBorderRenderer
             if(_showExecutionInfo) Debug.Log(GetExecutionInfo());
             await Task.Yield();
         }
-        
-        public string GetExecutionInfo()
+
+        private void DeletePointsInList(LinkedList<BorderPoint> list)
         {
-            var msg = $"{GetType().Name} deleted {_deletedPointsCount} points in {_stopwatch.ElapsedMilliseconds} milliseconds";
-            return msg;
+            _pointsForDelete.Clear();
+            var counter = -1;
+                    
+            for (var node = list.First; node.Next != null; node = node.Next)
+            {
+                counter++;
+                if(node.Previous == null) continue;
+                if(node.Next == null) continue;
+                        
+                var previousDirection = GetMoveDirection(node.Previous.Value, node.Value);
+                var nextDirection = GetMoveDirection(node.Value, node.Next.Value);
+
+                if (previousDirection == nextDirection)
+                {
+                    _pointsForDelete.Add(counter);
+                }
+                        
+            }
+                    
+            counter = -1;
+            LinkedListNode<BorderPoint> toRemove = null;
+                    
+            for (var node = list.First; node.Next != null; node = node.Next)
+            {
+                counter++;
+                        
+                if (_pointsForDelete.Contains(counter))
+                {
+                    if(toRemove != null) list.Remove(toRemove);
+                    toRemove = node;
+                            
+                }
+                        
+            }
         }
 
 

@@ -140,9 +140,18 @@ namespace MapBorderRenderer
             return currentIndex;
         }
                 
-        public Vector2 ConvertIndexToPixelCoordinated(int index)
+        public Vector2 ConvertIndexToFloatPixelCoordinated(int index)
         {          
             var result = Vector2.zero;
+            result.x = index % TextureWidth;
+            result.y = index / TextureWidth;
+                    
+            return result;
+        }
+               
+        public Vector2Int ConvertIndexToIntPixelCoordinated(int index)
+        {          
+            var result = Vector2Int.zero;
             result.x = index % TextureWidth;
             result.y = index / TextureWidth;
                     

@@ -35,7 +35,7 @@ namespace MapBorderRenderer
                 if (mode != 0)
                 {
                     Gizmos.color = Color.magenta;
-                    Vector3 pos2 = start + (Vector3)_data.ConvertIndexToPixelCoordinated(_tstI);
+                    Vector3 pos2 = start + (Vector3)_data.ConvertIndexToFloatPixelCoordinated(_tstI);
                     Gizmos.DrawSphere(pos2, 0.35f); 
                 }
                 
@@ -46,7 +46,7 @@ namespace MapBorderRenderer
                     {
                         Gizmos.color = Color.red;
 
-                        Vector3 pos = start + (Vector3)_data.ConvertIndexToPixelCoordinated(index);
+                        Vector3 pos = start + (Vector3)_data.ConvertIndexToFloatPixelCoordinated(index);
                         Gizmos.DrawSphere(pos, 0.25f);
                     }
                     counter++;
@@ -59,7 +59,7 @@ namespace MapBorderRenderer
                     {
                         Gizmos.color = Color.blue;
 
-                        Vector3 pos = start + (Vector3)_data.ConvertIndexToPixelCoordinated(index);
+                        Vector3 pos = start + (Vector3)_data.ConvertIndexToFloatPixelCoordinated(index);
                         Gizmos.DrawSphere(pos, 0.15f);
                     }
                 }
