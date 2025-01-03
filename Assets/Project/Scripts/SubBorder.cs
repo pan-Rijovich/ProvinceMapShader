@@ -7,6 +7,7 @@ public class SubBorder : IEnumerable<BorderPoint>
     public HashSet<BorderPoint> UnsortedPoints = new(8);
     public List<LinkedList<BorderPoint>> SortedPointsLists = new();
     public List<LineRenderer> Lines = new();
+    public bool IsCycled;
     public readonly int Color1;
     public readonly int Color2;
     public readonly int ClusterIndexForColor1;
