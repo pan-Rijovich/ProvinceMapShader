@@ -76,8 +76,8 @@ namespace MapBorderRenderer
 
             line.positionCount = linePoints.Length * 2;
             line.SetPositions(BSpline.CalculateBSpline(linePoints.ToList(), line.positionCount).ToArray());
-            //line.positionCount = array.Length;
-            //line.SetPositions(array);
+            //line.positionCount = linePoints.Length;
+            //line.SetPositions(linePoints);
             
             line.loop = subBorder.IsCycled;
             subBorder.Lines.Add(line);

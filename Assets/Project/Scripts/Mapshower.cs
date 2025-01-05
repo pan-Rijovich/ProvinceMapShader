@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Profiling;
+using Debug = UnityEngine.Debug;
 
 public class Mapshower : MonoBehaviour
 {
     [SerializeField] Color32 targetColor;
+    [SerializeField] bool _showLogs;
 
     private Color32[] remapArr;
     private Texture2D paletteTex;
@@ -62,7 +65,7 @@ public class Mapshower : MonoBehaviour
 
     private void CalcRemap(Texture2D provinceTex)
     {
-        Profiler.BeginSample("Calc remap");
+        if(_showLogs) Profiler.BeginSample("Calc remap");
         Stopwatch stopwatch = new();
         stopwatch.Start();
 
@@ -94,13 +97,13 @@ public class Mapshower : MonoBehaviour
         }
 
         var calcTime = stopwatch.Elapsed;
-        UnityEngine.Debug.Log($"remap calc time:{calcTime}\n");
+        if(_showLogs) Debug.Log($"remap calc time:{calcTime}\n");
 
         remapTex.LoadRawTextureData(remapByteArr);
         remapTex.Apply(false);
 
         var fillTime = stopwatch.Elapsed - calcTime;
-        UnityEngine.Debug.Log($"fill remapTex time:{fillTime}\n");
+        if(_showLogs) Debug.Log($"fill remapTex time:{fillTime}\n");
 
         remapArr = new Color32[remapByteArr.Length / 2];
         for (int i = 0; i < remapByteArr.Length / 2; i++)
@@ -108,11 +111,11 @@ public class Mapshower : MonoBehaviour
             remapArr[i] = new Color32(remapByteArr[i << 1], remapByteArr[(i << 1) + 1], 0, 255);
         }
 
-        UnityEngine.Debug.Log($"fill remapArr time:{stopwatch.Elapsed - fillTime - calcTime}\n");
+        if(_showLogs) Debug.Log($"fill remapArr time:{stopwatch.Elapsed - fillTime - calcTime}\n");
 
         stopwatch.Stop();
-        UnityEngine.Debug.Log($"total time:{stopwatch.Elapsed}\n");
-        Profiler.EndSample();
+        if(_showLogs) Debug.Log($"total time:{stopwatch.Elapsed}\n");
+        if(_showLogs) Profiler.EndSample();
     }
 
     private void ChangePaletteColor(Color32 remapColor, Color32 showColor)
@@ -146,7 +149,7 @@ public class Mapshower : MonoBehaviour
         }
     }
 
-    [ContextMenu("FillRandomColor")]
+    [Button]
     private void FillRandomColorPaletteTexture()
     {
         var paletteArr = new Color32[256 * 256];
