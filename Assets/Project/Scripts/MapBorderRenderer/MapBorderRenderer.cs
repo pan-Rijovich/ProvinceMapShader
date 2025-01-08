@@ -8,8 +8,11 @@ namespace MapBorderRenderer
 {
     public class MapBorderRenderer : MonoBehaviour
     {
+        [SerializeField] private Texture2D _provinceTexture;
+        [SerializeField] private MeshFilter _mesh;
         [SerializeField] private LineRenderer _lineRendererPrefab;
         [SerializeField] private Transform _lineContainer;
+        
         [SerializeField] public Color32 _debugProvince;
         [SerializeField] public Color32 _oldDebugProvince;
         [SerializeField, Range(0, 3)] private int _debugMode = 0;
@@ -25,8 +28,7 @@ namespace MapBorderRenderer
 
         private async void Start()
         {
-            _data = new(GetComponent<Renderer>().material, GetComponent<MeshFilter>().mesh, transform);
-
+            _data = new(_provinceTexture, _mesh);
             _steps = new()
             {
                 new BorderPixelsCollectionStep(_data, _showExecutionInfo),
@@ -69,7 +71,7 @@ namespace MapBorderRenderer
                     int y = (int)Mathf.Floor(p.y * _data.TextureHeight);
 
                     _oldDebugProvince = _debugProvince;
-                    _debugProvince = _data.Texture.GetPixel(x, y);
+                    _debugProvince = _provinceTexture.GetPixel(x, y);
                 }  
             }
  

@@ -64,12 +64,17 @@ namespace MapBorderRenderer
             line.name = $"Border ID:{id}   С1:{subBorder.ClusterIndexForColor1} С2:{subBorder.ClusterIndexForColor2} ";
             
             Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2);
+            //Vector3 start = _data.MeshBounds.min;
+            start.z = 0;
             Vector3[] linePoints = new Vector3[points.Count];
-            var counter = 0;
             
+            var counter = 0;
             foreach (var point in points)
             {
-                linePoints[counter] = start + new Vector3(point.X / 2f, point.Y / 2f, -0.002f); // -0.35f
+                var normalizedPointX = point.X / 2f / _data.TextureWidth * _data.MeshSize.x;
+                var normalizedPointY = point.Y / 2f / _data.TextureHeight * _data.MeshSize.y;
+                linePoints[counter] = start + new Vector3(normalizedPointX, normalizedPointY, -0.002f);
+                linePoints[counter].z = GetPointHeight(linePoints[counter]);
                 counter++;
                 _borderPointsCounter++;
             }
@@ -81,6 +86,18 @@ namespace MapBorderRenderer
             
             line.loop = subBorder.IsCycled;
             subBorder.Lines.Add(line);
+        }
+
+        private float GetPointHeight(Vector3 point)
+        {
+            var height = -0.002f;
+
+            if (Physics.Raycast(point, new Vector3(0f, 0f, 1f), out RaycastHit hit))
+            {
+                height = hit.point.z - 0.08f;
+            }
+
+            return height;
         }
     }
 }
