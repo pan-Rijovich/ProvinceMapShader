@@ -143,7 +143,7 @@ namespace MapBorderRenderer.Debugers
 
         private void GetBorder()
         {
-            var id = _data.GenerateBorderID(_data.Color32ToInt(_renderer._debugProvince), _data.Color32ToInt(_renderer._oldDebugProvince));
+            var id = _data.GenerateBorderID(_renderer._debugProvince.ToInt(), _renderer._oldDebugProvince.ToInt());
             _data.Borders.TryGetValue(id, out _border);
         }
     }

@@ -44,21 +44,6 @@ namespace MapBorderRenderer
             }
             return id;
         }
-        
-        public int Color32ToInt(Color32 color)
-        {
-            return (color.r << 24) | (color.g << 16) | (color.b << 8) | color.a;
-        }
-        
-        public Color32 IntToColor32(int value)
-        {
-            byte r = (byte)((value >> 24) & 0xFF);
-            byte g = (byte)((value >> 16) & 0xFF);
-            byte b = (byte)((value >> 8) & 0xFF);
-            byte a = (byte)(value & 0xFF);
-
-            return new Color32(r, g, b, a);
-        }
 
         #region INDEX_CALCULATIONS
         public int GetLeftIndex(int currentIndex)

@@ -27,7 +27,7 @@ namespace MapBorderRenderer
         
         public void DrawGizmos(Color32 provColor, Color32 provColor2, int mode)
         {
-            var id = _data.GenerateBorderID(_data.Color32ToInt(provColor), _data.Color32ToInt(provColor2));
+            var id = _data.GenerateBorderID(provColor.ToInt(), provColor2.ToInt());
             if (_data.Borders.TryGetValue(id, out var border))
             {
                 Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2);// + new Vector3(0.5f, 0.5f);

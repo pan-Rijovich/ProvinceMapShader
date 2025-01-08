@@ -15,4 +15,14 @@ public static class IntExtensions
     {
         return (int)((digit % Mathf.Pow(10, number)) / Mathf.Pow(10, number - 1));
     }
+    
+    public static Color32 ToColor32(this int value)
+    {
+        byte r = (byte)((value >> 24) & 0xFF);
+        byte g = (byte)((value >> 16) & 0xFF);
+        byte b = (byte)((value >> 8) & 0xFF);
+        byte a = (byte)(value & 0xFF);
+
+        return new Color32(r, g, b, a);
+    }
 }

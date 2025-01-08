@@ -26,9 +26,9 @@ namespace MapBorderRenderer
 
         public void DrawGizmos(Color32 provColor, Color32 provColor2, int mode)
         {
-            if (_data.BorderPixels.ContainsKey(_data.Color32ToInt(provColor)))
+            if (_data.BorderPixels.ContainsKey(provColor.ToInt()))
             {
-                var borderPixels = _data.BorderPixels[_data.Color32ToInt(provColor)];
+                var borderPixels = _data.BorderPixels[provColor.ToInt()];
                 
                 Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2) + new Vector3(0.5f, 0.5f);
 
@@ -77,7 +77,7 @@ namespace MapBorderRenderer
             {
                 if (_handledPixels.Contains(i) == false)
                 {
-                    int current = _data.Color32ToInt(_data.TextureArr[i]);
+                    int current = _data.TextureArr[i].ToInt();
                     
                     if(_data.BorderPixels.ContainsKey(current) == false) _data.BorderPixels.Add(current, new BorderPixelsCollection(current));
                     var borderPixelsCluster = new HashSet<int>(64);
@@ -147,8 +147,8 @@ namespace MapBorderRenderer
         {
             if(_queueContainsChecker.Contains(neighbourPixel)) return;
             
-            var colorFrom = _data.Color32ToInt(_data.TextureArr[pixel]);
-            var colorTo = _data.Color32ToInt(_data.TextureArr[neighbourPixel]);
+            var colorFrom = _data.TextureArr[pixel].ToInt();
+            var colorTo = _data.TextureArr[neighbourPixel].ToInt();
             
             if (colorFrom == colorTo)
             {

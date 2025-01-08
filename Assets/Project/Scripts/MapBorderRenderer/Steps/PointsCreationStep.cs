@@ -28,7 +28,7 @@ namespace MapBorderRenderer
         
         public void DrawGizmos(Color32 provColor, Color32 provColor2, int mode)
         {
-            var id = _data.GenerateBorderID(_data.Color32ToInt(provColor), _data.Color32ToInt(provColor2));
+            var id = _data.GenerateBorderID(provColor.ToInt(), provColor2.ToInt());
             if (_data.Borders.TryGetValue(id, out var border))
             {
                 Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2);// + new Vector3(0.5f, 0.5f);
@@ -114,8 +114,8 @@ namespace MapBorderRenderer
         {
             _fromPixelIndex = fromPixelIndex;
             _toPixelIndex = toPixelIndex;
-            _fromColor = _data.Color32ToInt(_data.TextureArr[_fromPixelIndex]);
-            _toColor = _data.Color32ToInt(_data.TextureArr[_toPixelIndex]);
+            _fromColor = _data.TextureArr[_fromPixelIndex].ToInt();
+            _toColor = _data.TextureArr[_toPixelIndex].ToInt();
             if (_fromColor == _toColor) return;
             
             
@@ -215,11 +215,11 @@ namespace MapBorderRenderer
         private void TryAddHorizontalEdgePoints(BorderPoint point, SubBorder subBorder)
         {
             var neighborPixelIndex = _data.GetLeftIndex(_fromPixelIndex);
-            var neighborColor = _data.Color32ToInt(_data.TextureArr[neighborPixelIndex]);
+            var neighborColor = _data.TextureArr[neighborPixelIndex].ToInt();
             var neighborComparision = GetEdgeColorComparision(neighborColor, neighborPixelIndex);
             
             var diagonalNeighborPixelIndex = _data.GetLeftIndex(_toPixelIndex);
-            var diagonalNeighborColor = _data.Color32ToInt(_data.TextureArr[diagonalNeighborPixelIndex]);
+            var diagonalNeighborColor = _data.TextureArr[diagonalNeighborPixelIndex].ToInt();
             var diagonalNeighborComparision = GetEdgeColorComparision(diagonalNeighborColor, diagonalNeighborPixelIndex);
                 
             //neighborComparision = _fromColor  != neighborColor && _toColor  != neighborColor;
@@ -235,11 +235,11 @@ namespace MapBorderRenderer
                 
             
             neighborPixelIndex = _data.GetRightIndex(_fromPixelIndex);
-            neighborColor = _data.Color32ToInt(_data.TextureArr[neighborPixelIndex]);
+            neighborColor = _data.TextureArr[neighborPixelIndex].ToInt();
             neighborComparision = GetEdgeColorComparision(neighborColor, neighborPixelIndex);
             
             diagonalNeighborPixelIndex = _data.GetRightIndex(_toPixelIndex);
-            diagonalNeighborColor = _data.Color32ToInt(_data.TextureArr[diagonalNeighborPixelIndex]);
+            diagonalNeighborColor = _data.TextureArr[diagonalNeighborPixelIndex].ToInt();
             diagonalNeighborComparision = GetEdgeColorComparision(diagonalNeighborColor, diagonalNeighborPixelIndex);
                 
             if (neighborComparision || diagonalNeighborComparision)
@@ -255,11 +255,11 @@ namespace MapBorderRenderer
             BorderPoint point, SubBorder subBorder)
         {
             var neighborPixelIndex = _data.GetUpIndex(_fromPixelIndex);
-            var neighborColor = _data.Color32ToInt(_data.TextureArr[neighborPixelIndex]);
+            var neighborColor = _data.TextureArr[neighborPixelIndex].ToInt();
             var neighborComparision = GetEdgeColorComparision(neighborColor, neighborPixelIndex);
             
             var diagonalNeighborPixelIndex = _data.GetUpIndex(_toPixelIndex);
-            var diagonalNeighborColor = _data.Color32ToInt(_data.TextureArr[diagonalNeighborPixelIndex]);
+            var diagonalNeighborColor = _data.TextureArr[diagonalNeighborPixelIndex].ToInt();
             var diagonalNeighborComparision = GetEdgeColorComparision(diagonalNeighborColor, diagonalNeighborPixelIndex);
             
             if (neighborComparision || diagonalNeighborComparision)
@@ -271,11 +271,11 @@ namespace MapBorderRenderer
             }
                 
             neighborPixelIndex = _data.GetDownIndex(_fromPixelIndex);
-            neighborColor = _data.Color32ToInt(_data.TextureArr[neighborPixelIndex]);
+            neighborColor = _data.TextureArr[neighborPixelIndex].ToInt();
             neighborComparision = GetEdgeColorComparision(neighborColor, neighborPixelIndex);
             
             diagonalNeighborPixelIndex = _data.GetDownIndex(_toPixelIndex);
-            diagonalNeighborColor = _data.Color32ToInt(_data.TextureArr[diagonalNeighborPixelIndex]);
+            diagonalNeighborColor = _data.TextureArr[diagonalNeighborPixelIndex].ToInt();
             diagonalNeighborComparision = GetEdgeColorComparision(diagonalNeighborColor, diagonalNeighborPixelIndex);
                 
             if (neighborComparision || diagonalNeighborComparision)
