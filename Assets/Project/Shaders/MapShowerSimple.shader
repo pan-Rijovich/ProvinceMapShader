@@ -9,11 +9,7 @@ Shader "Custom/MapShowerSimple"
         _PaletteTex ("Pallete", 2D) = "white" {}
         _TerrainTex ("Terrain", 2D) = "white" {}
         _NormalMap ("Normal", 2D) = "bump" {}
-
-        _BorderSize ("Border Size", Range(0.0, 0.001)) = 0.0001
-        _BorderColor ("Border Color", Color) = (0,0,0,1)
-
-        [Toggle] _BoolTest("is Bending", Float) = 0
+        _Tilling ("Tilling", Vector) = (1,1,0,0)
     }
     SubShader
     {
@@ -21,10 +17,8 @@ Shader "Custom/MapShowerSimple"
         LOD 200
 
         CGPROGRAM
-        // Physically based Standard lighting model, and enable shadows on all light types
         #pragma surface surf Standard fullforwardshadows
-
-        // Use shader model 3.0 target, to get nicer looking lighting
+        #pragma multi_compile_instancing
         #pragma target 3.0
 
         sampler2D _ProvinceTex;
@@ -32,21 +26,17 @@ Shader "Custom/MapShowerSimple"
         sampler2D _PaletteTex;
         sampler2D _TerrainTex;
         sampler2D _NormalMap;
-        float4 _ProvinceTex_TexelSize;
+        //float4 _Tilling;
+        float4 _RemapTex_TexelSize;
         fixed4 counter = 0;
-
-        float _BorderSize;
-        fixed4 _BorderColor;
-        bool _BoolTest;
 
         struct Input
         {
-            float2 uv_ProvinceTex;
-            float2 uv_NormalMap;
+            float2 uv_RemapTex;
         };
 
         UNITY_INSTANCING_BUFFER_START(Props)
-
+            UNITY_DEFINE_INSTANCED_PROP(float4, _Tilling)
         UNITY_INSTANCING_BUFFER_END(Props)
 
         fixed4 get_secondary_color(float2 uv)
@@ -58,11 +48,12 @@ Shader "Custom/MapShowerSimple"
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-            float2 uv = IN.uv_ProvinceTex;
+            float4 tilling = UNITY_ACCESS_INSTANCED_PROP(Props, _Tilling);
+            float2 baseUV =  IN.uv_RemapTex * tilling.xy + tilling.zw;
 
-            uv -= _ProvinceTex_TexelSize.xy * 0.5;
+            float2 uv = baseUV - _RemapTex_TexelSize.xy * 0.5;
 
-            float2 textureSize = float2(_ProvinceTex_TexelSize.z, _ProvinceTex_TexelSize.w);
+            float2 textureSize = float2(_RemapTex_TexelSize.z, _RemapTex_TexelSize.w);
 
             float2 pixelCoord = uv * textureSize;
 
@@ -88,7 +79,7 @@ Shader "Custom/MapShowerSimple"
 
             fixed4 finalColor = colorBL * wBL + colorBR * wBR + colorTL * wTL + colorTR * wTR;
 
-            o.Albedo = lerp(tex2D(_TerrainTex, IN.uv_NormalMap), finalColor, finalColor.a).rgb;
+            o.Albedo = lerp(tex2D(_TerrainTex, baseUV), finalColor, finalColor.a).rgb;
         }
         ENDCG
     }

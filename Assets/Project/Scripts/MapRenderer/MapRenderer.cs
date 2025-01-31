@@ -13,15 +13,15 @@ namespace Project.Scripts.MapRenderer
         
         private List<List<MeshRenderer>> _chunks;
         
-        private Vector2 _chunkTillingOffset;
+        private Vector2 _chunkTilling;
         private Vector2Int _chunkCount;
 
         private void Awake()
         {
-            _chunkTillingOffset.x = (float)_mapSize.x / _chunckSize;
-            _chunkTillingOffset.y = (float)_mapSize.y / _chunckSize;
             _chunkCount.x = (int)MathF.Ceiling((float)_mapSize.x / _chunckSize);
             _chunkCount.y = (int)MathF.Ceiling((float)_mapSize.y / _chunckSize);
+            _chunkTilling.x = 1f / _chunkCount.x;
+            _chunkTilling.y = 1f / _chunkCount.y;
             
             var startOffset = new Vector3(-_mapSize.x / 2f, -_mapSize.y / 2f);
             
@@ -36,6 +36,13 @@ namespace Project.Scripts.MapRenderer
                     var chunk = Instantiate(_quadPrefab, transform);
                     chunk.name = $"Chunk {x}, {y}";
                     chunk.transform.position = startOffset + new Vector3(x * _chunckSize, y * _chunckSize);
+                    
+                    var block = new MaterialPropertyBlock();
+                    Vector4 tilingOffset = new Vector4(_chunkTilling.x, _chunkTilling.y, _chunkTilling.x * x, _chunkTilling.y * y); 
+                    //block.SetVector("_NormalMap_ST", tilingOffset);
+                    //block.SetVector("_ProvinceTex_ST", tilingOffset);
+                    block.SetVector("_Tilling", tilingOffset);
+                    chunk.SetPropertyBlock(block);
                     
                     _chunks[y].Add(chunk);
                 }

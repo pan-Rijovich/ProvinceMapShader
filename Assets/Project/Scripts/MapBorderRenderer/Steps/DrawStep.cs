@@ -85,6 +85,7 @@ namespace MapBorderRenderer
             //line.SetPositions(linePoints);
             
             line.loop = subBorder.IsCycled;
+            line.gameObject.isStatic = true;
             subBorder.Lines.Add(line);
         }
 
