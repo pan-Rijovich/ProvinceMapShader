@@ -12,7 +12,7 @@ namespace MapBorderRenderer.Debugers
         private MapBorderRenderer _renderer;
         private SortPointsStep _step;
         private MapBorderData _data;
-        private Border _border;
+        private BorderCreationData _border;
         private ActivityPool<DebugPoint> _pool;
         private Vector3 _start;
         
@@ -144,7 +144,7 @@ namespace MapBorderRenderer.Debugers
         private void GetBorder()
         {
             var id = _data.GenerateBorderID(_renderer._debugProvince.ToInt(), _renderer._oldDebugProvince.ToInt());
-            _data.Borders.TryGetValue(id, out _border);
+            _data.BordersCreationData.TryGetValue(id, out _border);
         }
     }
 }

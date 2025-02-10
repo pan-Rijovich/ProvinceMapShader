@@ -1,15 +1,16 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Border : IEnumerable<SubBorder>
+public class BorderCreationData : IEnumerable<SubBorderCreationData>
 {
     public readonly long ID;
-    public readonly List<SubBorder> SubBorders;
+    public readonly List<SubBorderCreationData> SubBorders;
     public int Color1 { get; set; }
     public int Color2 { get; set; }
 
-    public Border(long id, int color1, int color2)
+    public BorderCreationData(long id, int color1, int color2)
     {
         ID = id;
         Color1 = color1;
@@ -17,19 +18,19 @@ public class Border : IEnumerable<SubBorder>
         SubBorders = new(1);
     }
 
-    public SubBorder this[int index] {
+    public SubBorderCreationData this[int index] {
         get => SubBorders[index];
         set => SubBorders[index] = value; 
     }
 
-    public SubBorder AddSubBorder(int clusterIndexForColor1, int clusterIndexForColor2)
+    public SubBorderCreationData AddSubBorder(int clusterIndexForColor1, int clusterIndexForColor2)
     {
-        var subBorder = new SubBorder(Color1, Color2, clusterIndexForColor1, clusterIndexForColor2);
+        var subBorder = new SubBorderCreationData(Color1, Color2, clusterIndexForColor1, clusterIndexForColor2);
         SubBorders.Add(subBorder);
         return subBorder;
     }
     
-    public bool TryGetSubBorder(int clusterIndexForColor1, int clusterIndexForColor2, out SubBorder result)
+    public bool TryGetSubBorder(int clusterIndexForColor1, int clusterIndexForColor2, out SubBorderCreationData result)
     {
         result = null;
         foreach (var subborder in SubBorders)
@@ -56,7 +57,7 @@ public class Border : IEnumerable<SubBorder>
     }
     
 
-    public IEnumerator<SubBorder> GetEnumerator() => SubBorders.GetEnumerator();
+    public IEnumerator<SubBorderCreationData> GetEnumerator() => SubBorders.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

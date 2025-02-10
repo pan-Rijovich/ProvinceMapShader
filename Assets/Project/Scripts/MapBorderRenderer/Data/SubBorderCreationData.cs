@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SubBorder : IEnumerable<BorderPoint>
+public class SubBorderCreationData : IEnumerable<BorderPoint>
 {
     public HashSet<BorderPoint> UnsortedPoints = new(8);
     public List<LinkedList<BorderPoint>> SortedPointsLists = new();
-    public List<LineRenderer> Lines = new();
+    public List<LineRenderer> Lines { get; set; } = new();
     public bool IsCycled;
     public readonly int Color1;
     public readonly int Color2;
@@ -14,7 +14,7 @@ public class SubBorder : IEnumerable<BorderPoint>
     public readonly int ClusterIndexForColor2;
     public readonly int HashID;
 
-    public SubBorder(int color1, int color2, int clusterIndexForColor1, int clusterIndexForColor2)
+    public SubBorderCreationData(int color1, int color2, int clusterIndexForColor1, int clusterIndexForColor2)
     {
         Color1 = color1;
         Color2 = color2;
@@ -31,9 +31,9 @@ public class SubBorder : IEnumerable<BorderPoint>
 
     public override bool Equals(object obj)
     {
-        if (obj.GetType() == typeof(SubBorder) == false) return false;
+        if (obj.GetType() == typeof(SubBorderCreationData) == false) return false;
 
-        var other = (SubBorder)obj;
+        var other = (SubBorderCreationData)obj;
         
         //return HashID == other.HashID;
         return Color1.Equals(other.Color1) && Color2.Equals(other.Color2) && 

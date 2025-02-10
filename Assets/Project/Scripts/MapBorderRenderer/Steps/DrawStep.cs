@@ -41,9 +41,9 @@ namespace MapBorderRenderer
         {
             _stopwatch.Restart();
 
-            foreach (var border in _data.Borders.Values)
+            foreach (var border in _data.BordersSaveData)
             {
-                foreach (var subBorder in border)
+                foreach (var subBorder in border.SubBorders)
                 {
                     foreach (var list in subBorder.SortedPointsLists)
                     {
@@ -57,24 +57,23 @@ namespace MapBorderRenderer
             await Task.Yield();
         }
         
-        private void DrawBorder(long id, SubBorder subBorder, LinkedList<BorderPoint> points)
+        private void DrawBorder(long id, SubBorderSaveData subBorder, int[] points)
         {
             _borderPartCounter++;
             var line = Object.Instantiate(_linePrefab, _container);
             line.name = $"Border ID:{id}   С1:{subBorder.ClusterIndexForColor1} С2:{subBorder.ClusterIndexForColor2} ";
             
             Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2);
-            //Vector3 start = _data.MeshBounds.min;
             start.z = 0;
-            Vector3[] linePoints = new Vector3[points.Count];
+            Vector3[] linePoints = new Vector3[points.Length / 2];
             
             var counter = 0;
-            foreach (var point in points)
+            for(int i = 0; i < points.Length; i += 2)
             {
-                var normalizedPointX = point.X / 2f / _data.TextureWidth * _data.MeshSize.x;
-                var normalizedPointY = point.Y / 2f / _data.TextureHeight * _data.MeshSize.y;
+                var normalizedPointX = points[i] / 2f / _data.TextureWidth * _data.MeshSize.x;
+                var normalizedPointY = points[i + 1] / 2f / _data.TextureHeight * _data.MeshSize.y;
                 linePoints[counter] = start + new Vector3(normalizedPointX, normalizedPointY, -0.002f);
-                linePoints[counter].z = GetPointHeight(linePoints[counter]);
+                linePoints[counter].z = 1f;
                 counter++;
                 _borderPointsCounter++;
             }
@@ -86,7 +85,8 @@ namespace MapBorderRenderer
             
             line.loop = subBorder.IsCycled;
             line.gameObject.isStatic = true;
-            subBorder.Lines.Add(line);
+            line.gameObject.layer = LayerMask.NameToLayer("Border");
+            //subBorder.Lines.Add(line);
         }
 
         private float GetPointHeight(Vector3 point)

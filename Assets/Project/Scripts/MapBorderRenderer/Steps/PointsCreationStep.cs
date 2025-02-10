@@ -29,7 +29,7 @@ namespace MapBorderRenderer
         public void DrawGizmos(Color32 provColor, Color32 provColor2, int mode)
         {
             var id = _data.GenerateBorderID(provColor.ToInt(), provColor2.ToInt());
-            if (_data.Borders.TryGetValue(id, out var border))
+            if (_data.BordersCreationData.TryGetValue(id, out var border))
             {
                 Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2);// + new Vector3(0.5f, 0.5f);
                 Gizmos.color = Color.blue;
@@ -87,11 +87,11 @@ namespace MapBorderRenderer
         
         public string GetExecutionInfo()
         {
-            int bordersCount = _data.Borders.Count;
+            int bordersCount = _data.BordersCreationData.Count;
             int subBordersCount = 0;
             int pointsCount = 0;
 
-            foreach (var border in _data.Borders.Values)
+            foreach (var border in _data.BordersCreationData.Values)
             {
                 foreach (var subBorder in border)
                 {
@@ -146,17 +146,17 @@ namespace MapBorderRenderer
             }
         }
 
-        private Border GetBorder(long id, int color1, int color2)
+        private BorderCreationData GetBorder(long id, int color1, int color2)
         {
-            if (_data.Borders.TryGetValue(id, out var createBorder)) return createBorder;
+            if (_data.BordersCreationData.TryGetValue(id, out var createBorder)) return createBorder;
             
-            var border = new Border(id, color1, color2);
-            _data.Borders.Add(id, border);
+            var border = new BorderCreationData(id, color1, color2);
+            _data.BordersCreationData.Add(id, border);
                 
             return border;
         }
 
-        private SubBorder GetSubBorder(Border border, int color1, int color2, int color1ClusterIndex, int color2ClusterIndex)
+        private SubBorderCreationData GetSubBorder(BorderCreationData border, int color1, int color2, int color1ClusterIndex, int color2ClusterIndex)
         {
             if (border.Color1 == color2)
             {
@@ -212,7 +212,7 @@ namespace MapBorderRenderer
             return point;
         }
 
-        private void TryAddHorizontalEdgePoints(BorderPoint point, SubBorder subBorder)
+        private void TryAddHorizontalEdgePoints(BorderPoint point, SubBorderCreationData subBorder)
         {
             var neighborPixelIndex = _data.GetLeftIndex(_fromPixelIndex);
             var neighborColor = _data.TextureArr[neighborPixelIndex].ToInt();
@@ -252,7 +252,7 @@ namespace MapBorderRenderer
         }
 
         private void TryAddVerticalEdgePoints(int fromPixelIndex, int toPixelIndex, int fromColor, int toColor,
-            BorderPoint point, SubBorder subBorder)
+            BorderPoint point, SubBorderCreationData subBorder)
         {
             var neighborPixelIndex = _data.GetUpIndex(_fromPixelIndex);
             var neighborColor = _data.TextureArr[neighborPixelIndex].ToInt();

@@ -6,7 +6,8 @@ namespace MapBorderRenderer
     public class MapBorderData
     {
         public Dictionary<int, BorderPixelsCollection> BorderPixels { get; set; } = new(5000);
-        public Dictionary<long, Border> Borders { get; set; } = new();
+        public Dictionary<long, BorderCreationData> BordersCreationData { get; set; } = new();
+        public BorderSaveData[] BordersSaveData;
 
         public Color32[] TextureArr { get; set; }
         public int TextureWidth { get; private set; }

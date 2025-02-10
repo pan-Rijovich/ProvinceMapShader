@@ -28,7 +28,7 @@ namespace MapBorderRenderer
         public void DrawGizmos(Color32 provColor, Color32 provColor2, int mode)
         {
             var id = _data.GenerateBorderID(provColor.ToInt(), provColor2.ToInt());
-            if (_data.Borders.TryGetValue(id, out var border))
+            if (_data.BordersCreationData.TryGetValue(id, out var border))
             {
                 Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2);// + new Vector3(0.5f, 0.5f);
                 
@@ -86,7 +86,7 @@ namespace MapBorderRenderer
         public async Task Execute()
         {
             _stopwatch.Restart();
-            foreach (var border in _data.Borders.Values)
+            foreach (var border in _data.BordersCreationData.Values)
             {            
                 foreach (var subBorder in border)
                 {
@@ -161,7 +161,7 @@ namespace MapBorderRenderer
             await Task.Yield();
         }
         
-        public void CheckSubBorderCycling(SubBorder subBorder)
+        public void CheckSubBorderCycling(SubBorderCreationData subBorder)
         {
             if(subBorder.SortedPointsLists.Count > 1) return;
             

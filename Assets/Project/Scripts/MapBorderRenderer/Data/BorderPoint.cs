@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+
+[System.Serializable]
 public struct BorderPoint
 {
     public int X;

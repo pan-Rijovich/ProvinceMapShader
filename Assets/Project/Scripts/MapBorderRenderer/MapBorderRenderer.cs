@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Services.Storage;
 using UnityEngine;
 
 namespace MapBorderRenderer
@@ -24,24 +26,42 @@ namespace MapBorderRenderer
         public MapBorderData _data;
         
         public event Action OnInitialized;
-        
+
+        private IStorageService _storage = new BinaryStorageService();
 
         private async void Start()
         {
             _data = new(_provinceTexture, _mesh);
-            _steps = new()
+            
+            
+            if (_storage.HasFileByKey("BorderPoints"))
             {
-                new BorderPixelsCollectionStep(_data, _showExecutionInfo),
-                new PointsCreationStep(_data, _showExecutionInfo),
-                new SortPointsStep(_data, _showExecutionInfo),
-                new FilterStraightPointsStep(_data, _showExecutionInfo),
-                new DrawStep(_data, _lineRendererPrefab, _lineContainer, _showExecutionInfo),
-            };
-
+                _steps = new()
+                {
+                    new LoadPointsStep(_data, _showExecutionInfo),
+                    new DrawStep(_data, _lineRendererPrefab, _lineContainer, _showExecutionInfo),
+                };
+            }
+            else
+            {
+                _steps = new()
+                {
+                    new BorderPixelsCollectionStep(_data, _showExecutionInfo),
+                    new PointsCreationStep(_data, _showExecutionInfo),
+                    new SortPointsStep(_data, _showExecutionInfo),
+                    new FilterStraightPointsStep(_data, _showExecutionInfo),
+                    new SavePointsStep(_data, _showExecutionInfo),
+                    new DrawStep(_data, _lineRendererPrefab, _lineContainer, _showExecutionInfo),
+                };
+            }
+                
             foreach(var step in _steps)
             {
                 await step.Execute();
             }
+
+            _steps = null;
+            _data = null;
             
             OnInitialized?.Invoke();
         }

@@ -9,6 +9,9 @@ Shader "Custom/MapShowerSimple"
         _PaletteTex ("Pallete", 2D) = "white" {}
         _TerrainTex ("Terrain", 2D) = "white" {}
         _NormalMap ("Normal", 2D) = "bump" {}
+        _BorderTexture ("Border", 2D) = "black" {}
+        _BorderColorPalette ("BorderColor", 2D) = "black" {}
+        _BorderColor ("BorderColor", Color) = (1,1,1,1)
         _Tilling ("Tilling", Vector) = (1,1,0,0)
     }
     SubShader
@@ -26,9 +29,13 @@ Shader "Custom/MapShowerSimple"
         sampler2D _PaletteTex;
         sampler2D _TerrainTex;
         sampler2D _NormalMap;
-        //float4 _Tilling;
+        sampler2D _BorderTexture;
+        sampler2D _BorderColorPalette;
+        float4 _BorderColor;
         float4 _RemapTex_TexelSize;
         fixed4 counter = 0;
+
+        //UNITY_DECLARE_TEX2D(_BorderTexture);
 
         struct Input
         {
@@ -78,6 +85,18 @@ Shader "Custom/MapShowerSimple"
             float wTR = f.x * f.y;
 
             fixed4 finalColor = colorBL * wBL + colorBR * wBR + colorTL * wTL + colorTR * wTR;
+
+            
+            
+            vector<float, 4> borderValue = tex2D(_BorderTexture, IN.uv_RemapTex);
+
+            float borderPalettePixStep = 1.0 / 512.0;
+            float2 borderPaletteUV = IN.uv_RemapTex;
+            borderPaletteUV.y = 0.5f;
+            borderPaletteUV.x = lerp(borderPalettePixStep, 1.0-borderPalettePixStep, borderValue.x);
+            
+            float4 borderColor = tex2D(_BorderColorPalette, borderPaletteUV);
+            finalColor = lerp(finalColor, _BorderColor, borderValue.x);
 
             o.Albedo = lerp(tex2D(_TerrainTex, baseUV), finalColor, finalColor.a).rgb;
         }

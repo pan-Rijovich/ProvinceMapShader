@@ -36,7 +36,7 @@ namespace MapBorderRenderer
             _stopwatch.Restart();
 
             _deletedPointsCount = 0;
-            foreach (var border in _data.Borders.Values)
+            foreach (var border in _data.BordersCreationData.Values)
             {            
                 foreach (var subBorder in border)
                 {
