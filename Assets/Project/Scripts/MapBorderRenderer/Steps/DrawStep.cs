@@ -11,17 +11,17 @@ namespace MapBorderRenderer
     {
         private readonly Stopwatch _stopwatch = new();
         private readonly bool _showExecutionInfo;
-        private readonly MapBorderData _data;
+        private readonly MapBorderGenData _data;
         private readonly LineRenderer _linePrefab;
         private readonly Transform _container;
         private int _borderPartCounter = 0;
         private int _borderPointsCounter = 0;
 
-        public DrawStep(MapBorderData data, LineRenderer linePrefab, Transform container, bool showExecutionInfo = false)
+        public DrawStep(MapBorderGenData data, LineRenderer linePrefab, bool showExecutionInfo = false)
         {
             _data = data;
             _linePrefab = linePrefab;
-            _container = container;
+            _container = new GameObject("Borders").transform;
             _showExecutionInfo = showExecutionInfo;
         }
 
@@ -63,16 +63,15 @@ namespace MapBorderRenderer
             var line = Object.Instantiate(_linePrefab, _container);
             line.name = $"Border ID:{id}   С1:{subBorder.ClusterIndexForColor1} С2:{subBorder.ClusterIndexForColor2} ";
             
-            Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2);
-            start.z = 0;
+
             Vector3[] linePoints = new Vector3[points.Length / 2];
             
             var counter = 0;
             for(int i = 0; i < points.Length; i += 2)
             {
-                var normalizedPointX = points[i] / 2f / _data.TextureWidth * _data.MeshSize.x;
-                var normalizedPointY = points[i + 1] / 2f / _data.TextureHeight * _data.MeshSize.y;
-                linePoints[counter] = start + new Vector3(normalizedPointX, normalizedPointY, -0.002f);
+                var normalizedPointX = points[i] / 2f / _data.TexWidth * _data.MapSize.x;
+                var normalizedPointY = points[i + 1] / 2f / _data.TexHeight * _data.MapSize.y;
+                linePoints[counter] = _data.MapStartPoint + new Vector3(normalizedPointX, normalizedPointY, -0.002f);
                 linePoints[counter].z = 1f;
                 counter++;
                 _borderPointsCounter++;

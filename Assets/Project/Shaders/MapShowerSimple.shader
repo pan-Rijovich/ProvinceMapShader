@@ -56,9 +56,9 @@ Shader "Custom/MapShowerSimple"
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
             float4 tilling = UNITY_ACCESS_INSTANCED_PROP(Props, _Tilling);
-            float2 baseUV =  IN.uv_RemapTex * tilling.xy + tilling.zw;
+            float2 chunkUV =  IN.uv_RemapTex * tilling.xy + tilling.zw;
 
-            float2 uv = baseUV - _RemapTex_TexelSize.xy * 0.5;
+            float2 uv = chunkUV - _RemapTex_TexelSize.xy * 0.5;
 
             float2 textureSize = float2(_RemapTex_TexelSize.z, _RemapTex_TexelSize.w);
 
@@ -98,7 +98,10 @@ Shader "Custom/MapShowerSimple"
             float4 borderColor = tex2D(_BorderColorPalette, borderPaletteUV);
             finalColor = lerp(finalColor, _BorderColor, borderValue.x);
 
-            o.Albedo = lerp(tex2D(_TerrainTex, baseUV), finalColor, finalColor.a).rgb;
+            o.Albedo = lerp(tex2D(_TerrainTex, chunkUV), finalColor, finalColor.a).rgb;
+
+            fixed4 normalColor = tex2D(_NormalMap, chunkUV);
+            o.Normal = UnpackNormal(normalColor);
         }
         ENDCG
     }

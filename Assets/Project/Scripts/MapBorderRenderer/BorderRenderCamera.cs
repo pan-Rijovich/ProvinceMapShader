@@ -13,7 +13,7 @@ namespace Project.Scripts.MapRenderer
 
         public RenderTexture Render(Vector2 position, float size = 64f)
         {
-            _texture = new RenderTexture(512, 512, 0);
+            _texture = new RenderTexture(256, 256, 0);
             _texture.format = RenderTextureFormat.R8;
             _texture.depthStencilFormat = GraphicsFormat.None;
             _texture.filterMode = FilterMode.Bilinear;

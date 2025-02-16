@@ -9,7 +9,7 @@ namespace MapBorderRenderer
 {
     public class PointsCreationStep : IBorderCreationStep
     {
-        private MapBorderData _data;
+        private MapBorderGenData _genData;
         private Stopwatch _stopwatch = new();
         private bool _showExecutionInfo;
 
@@ -20,18 +20,18 @@ namespace MapBorderRenderer
         private int _fromClusterIndex;
         private int _toClusterIndex;
 
-        public PointsCreationStep(MapBorderData data, bool showExecutionInfo = false)
+        public PointsCreationStep(MapBorderGenData genData, bool showExecutionInfo = false)
         {
-            _data = data;
+            _genData = genData;
             _showExecutionInfo = showExecutionInfo;
         }
         
         public void DrawGizmos(Color32 provColor, Color32 provColor2, int mode)
         {
-            var id = _data.GenerateBorderID(provColor.ToInt(), provColor2.ToInt());
-            if (_data.BordersCreationData.TryGetValue(id, out var border))
+            var id = _genData.GenerateBorderID(provColor.ToInt(), provColor2.ToInt());
+            if (_genData.BordersCreationData.TryGetValue(id, out var border))
             {
-                Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2);// + new Vector3(0.5f, 0.5f);
+                Vector3 start = new Vector3(-_genData.MapSize.x / 2, -_genData.MapSize.y / 2);// + new Vector3(0.5f, 0.5f);
                 Gizmos.color = Color.blue;
                 Gizmos.DrawSphere(start, 0.15f);
                 Gizmos.DrawSphere(start + new Vector3(1f, 1f), 0.15f);
@@ -62,16 +62,16 @@ namespace MapBorderRenderer
         public async Task Execute()
         {
             _stopwatch.Restart();
-            foreach (var pair in _data.BorderPixels)
+            foreach (var pair in _genData.BorderPixels)
             {
                 foreach (var cluster in pair.Value)
                 {
                     foreach (var pixel in cluster)
                     {
-                        TryGeneratePointBetweenPixels(pixel, _data.GetUpIndex(pixel), MoveDirection.Up);
-                        TryGeneratePointBetweenPixels(pixel, _data.GetDownIndex(pixel), MoveDirection.Down);
-                        TryGeneratePointBetweenPixels(pixel, _data.GetLeftIndex(pixel), MoveDirection.Left);
-                        TryGeneratePointBetweenPixels(pixel, _data.GetRightIndex(pixel), MoveDirection.Right);
+                        TryGeneratePointBetweenPixels(pixel, _genData.GetUpIndex(pixel), MoveDirection.Up);
+                        TryGeneratePointBetweenPixels(pixel, _genData.GetDownIndex(pixel), MoveDirection.Down);
+                        TryGeneratePointBetweenPixels(pixel, _genData.GetLeftIndex(pixel), MoveDirection.Left);
+                        TryGeneratePointBetweenPixels(pixel, _genData.GetRightIndex(pixel), MoveDirection.Right);
                     }
                 }
             }
@@ -79,7 +79,7 @@ namespace MapBorderRenderer
             
             if(_showExecutionInfo) Debug.Log(GetExecutionInfo());
             
-            _data.TextureArr = null;
+            _genData.TexPixels = null;
             //_data.BorderPixels  = null;
 
             await Task.Yield();
@@ -87,11 +87,11 @@ namespace MapBorderRenderer
         
         public string GetExecutionInfo()
         {
-            int bordersCount = _data.BordersCreationData.Count;
+            int bordersCount = _genData.BordersCreationData.Count;
             int subBordersCount = 0;
             int pointsCount = 0;
 
-            foreach (var border in _data.BordersCreationData.Values)
+            foreach (var border in _genData.BordersCreationData.Values)
             {
                 foreach (var subBorder in border)
                 {
@@ -114,16 +114,16 @@ namespace MapBorderRenderer
         {
             _fromPixelIndex = fromPixelIndex;
             _toPixelIndex = toPixelIndex;
-            _fromColor = _data.TextureArr[_fromPixelIndex].ToInt();
-            _toColor = _data.TextureArr[_toPixelIndex].ToInt();
+            _fromColor = _genData.TexPixels[_fromPixelIndex].ToInt();
+            _toColor = _genData.TexPixels[_toPixelIndex].ToInt();
             if (_fromColor == _toColor) return;
             
             
-            var id = _data.GenerateBorderID(_fromColor, _toColor);
+            var id = _genData.GenerateBorderID(_fromColor, _toColor);
             var border = GetBorder(id, _fromColor, _toColor);
                 
-            _data.BorderPixels[_fromColor].TryGetClusterNumberForPixelIndex(_fromPixelIndex, out _fromClusterIndex);
-            _data.BorderPixels[_toColor].TryGetClusterNumberForPixelIndex(_toPixelIndex, out _toClusterIndex);
+            _genData.BorderPixels[_fromColor].TryGetClusterNumberForPixelIndex(_fromPixelIndex, out _fromClusterIndex);
+            _genData.BorderPixels[_toColor].TryGetClusterNumberForPixelIndex(_toPixelIndex, out _toClusterIndex);
 
             if (_fromClusterIndex == -1 || _toClusterIndex == -1)
             {
@@ -148,10 +148,10 @@ namespace MapBorderRenderer
 
         private BorderCreationData GetBorder(long id, int color1, int color2)
         {
-            if (_data.BordersCreationData.TryGetValue(id, out var createBorder)) return createBorder;
+            if (_genData.BordersCreationData.TryGetValue(id, out var createBorder)) return createBorder;
             
             var border = new BorderCreationData(id, color1, color2);
-            _data.BordersCreationData.Add(id, border);
+            _genData.BordersCreationData.Add(id, border);
                 
             return border;
         }
@@ -179,7 +179,7 @@ namespace MapBorderRenderer
         {
             var point = new BorderPoint();
             var difference = toIndex - fromIndex;
-            var width = _data.TextureWidth;
+            var width = _genData.TexWidth;
             
             point.X = (fromIndex % width);
             point.Y = (fromIndex / width);
@@ -214,12 +214,12 @@ namespace MapBorderRenderer
 
         private void TryAddHorizontalEdgePoints(BorderPoint point, SubBorderCreationData subBorder)
         {
-            var neighborPixelIndex = _data.GetLeftIndex(_fromPixelIndex);
-            var neighborColor = _data.TextureArr[neighborPixelIndex].ToInt();
+            var neighborPixelIndex = _genData.GetLeftIndex(_fromPixelIndex);
+            var neighborColor = _genData.TexPixels[neighborPixelIndex].ToInt();
             var neighborComparision = GetEdgeColorComparision(neighborColor, neighborPixelIndex);
             
-            var diagonalNeighborPixelIndex = _data.GetLeftIndex(_toPixelIndex);
-            var diagonalNeighborColor = _data.TextureArr[diagonalNeighborPixelIndex].ToInt();
+            var diagonalNeighborPixelIndex = _genData.GetLeftIndex(_toPixelIndex);
+            var diagonalNeighborColor = _genData.TexPixels[diagonalNeighborPixelIndex].ToInt();
             var diagonalNeighborComparision = GetEdgeColorComparision(diagonalNeighborColor, diagonalNeighborPixelIndex);
                 
             //neighborComparision = _fromColor  != neighborColor && _toColor  != neighborColor;
@@ -234,12 +234,12 @@ namespace MapBorderRenderer
             }
                 
             
-            neighborPixelIndex = _data.GetRightIndex(_fromPixelIndex);
-            neighborColor = _data.TextureArr[neighborPixelIndex].ToInt();
+            neighborPixelIndex = _genData.GetRightIndex(_fromPixelIndex);
+            neighborColor = _genData.TexPixels[neighborPixelIndex].ToInt();
             neighborComparision = GetEdgeColorComparision(neighborColor, neighborPixelIndex);
             
-            diagonalNeighborPixelIndex = _data.GetRightIndex(_toPixelIndex);
-            diagonalNeighborColor = _data.TextureArr[diagonalNeighborPixelIndex].ToInt();
+            diagonalNeighborPixelIndex = _genData.GetRightIndex(_toPixelIndex);
+            diagonalNeighborColor = _genData.TexPixels[diagonalNeighborPixelIndex].ToInt();
             diagonalNeighborComparision = GetEdgeColorComparision(diagonalNeighborColor, diagonalNeighborPixelIndex);
                 
             if (neighborComparision || diagonalNeighborComparision)
@@ -254,12 +254,12 @@ namespace MapBorderRenderer
         private void TryAddVerticalEdgePoints(int fromPixelIndex, int toPixelIndex, int fromColor, int toColor,
             BorderPoint point, SubBorderCreationData subBorder)
         {
-            var neighborPixelIndex = _data.GetUpIndex(_fromPixelIndex);
-            var neighborColor = _data.TextureArr[neighborPixelIndex].ToInt();
+            var neighborPixelIndex = _genData.GetUpIndex(_fromPixelIndex);
+            var neighborColor = _genData.TexPixels[neighborPixelIndex].ToInt();
             var neighborComparision = GetEdgeColorComparision(neighborColor, neighborPixelIndex);
             
-            var diagonalNeighborPixelIndex = _data.GetUpIndex(_toPixelIndex);
-            var diagonalNeighborColor = _data.TextureArr[diagonalNeighborPixelIndex].ToInt();
+            var diagonalNeighborPixelIndex = _genData.GetUpIndex(_toPixelIndex);
+            var diagonalNeighborColor = _genData.TexPixels[diagonalNeighborPixelIndex].ToInt();
             var diagonalNeighborComparision = GetEdgeColorComparision(diagonalNeighborColor, diagonalNeighborPixelIndex);
             
             if (neighborComparision || diagonalNeighborComparision)
@@ -270,12 +270,12 @@ namespace MapBorderRenderer
                 subBorder.AddPoint(edgePoint);
             }
                 
-            neighborPixelIndex = _data.GetDownIndex(_fromPixelIndex);
-            neighborColor = _data.TextureArr[neighborPixelIndex].ToInt();
+            neighborPixelIndex = _genData.GetDownIndex(_fromPixelIndex);
+            neighborColor = _genData.TexPixels[neighborPixelIndex].ToInt();
             neighborComparision = GetEdgeColorComparision(neighborColor, neighborPixelIndex);
             
-            diagonalNeighborPixelIndex = _data.GetDownIndex(_toPixelIndex);
-            diagonalNeighborColor = _data.TextureArr[diagonalNeighborPixelIndex].ToInt();
+            diagonalNeighborPixelIndex = _genData.GetDownIndex(_toPixelIndex);
+            diagonalNeighborColor = _genData.TexPixels[diagonalNeighborPixelIndex].ToInt();
             diagonalNeighborComparision = GetEdgeColorComparision(diagonalNeighborColor, diagonalNeighborPixelIndex);
                 
             if (neighborComparision || diagonalNeighborComparision)
@@ -295,7 +295,7 @@ namespace MapBorderRenderer
             }
             else
             {
-                _data.BorderPixels[neighborColor].TryGetClusterNumberForPixelIndex(neighborPixelIndex, out var neighborClusterIndex);
+                _genData.BorderPixels[neighborColor].TryGetClusterNumberForPixelIndex(neighborPixelIndex, out var neighborClusterIndex);
 
                 if (neighborClusterIndex == -1) return false;
                 

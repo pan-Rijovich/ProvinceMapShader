@@ -1,35 +1,28 @@
 ﻿using System.Collections.Generic;
+using Project.Scripts.Configs;
 using UnityEngine;
 
 namespace MapBorderRenderer
 {
-    public class MapBorderData
+    public class MapBorderGenData
     {
         public Dictionary<int, BorderPixelsCollection> BorderPixels { get; set; } = new(5000);
         public Dictionary<long, BorderCreationData> BordersCreationData { get; set; } = new();
         public BorderSaveData[] BordersSaveData;
 
-        public Color32[] TextureArr { get; set; }
-        public int TextureWidth { get; private set; }
-        public int TextureHeight { get; private set; }
-        public Vector3 MeshSize { get; private set; }
-        public Bounds MeshBounds { get; private set; }
+        public Color32[] TexPixels { get; set; }
+        public int TexWidth { get; private set; }
+        public int TexHeight { get; private set; }
+        public Vector3 MapSize { get; private set; }
+        public Vector3 MapStartPoint { get; private set; }
 
-        public MapBorderData(Texture2D provinceTexture, MeshFilter mesh)
+        public MapBorderGenData(MapConfig mapConfig)
         {
-            TextureArr = provinceTexture.GetPixels32();
-            TextureWidth = provinceTexture.width;
-            TextureHeight = provinceTexture.height;
-
-            if (mesh.sharedMesh != null)
-            {
-                var transform = mesh.transform;
-                MeshBounds = mesh.sharedMesh.bounds;
-                MeshSize += mesh.sharedMesh.bounds.size;
-                MeshSize = new Vector3(MeshSize.x * transform.localScale.x, 
-                    MeshSize.y * transform.localScale.y, 
-                    MeshSize.z * transform.localScale.z);
-            }
+            TexPixels = mapConfig.ProvinceTexture.GetPixels32();
+            TexWidth = mapConfig.ProvinceTexture.width;
+            TexHeight = mapConfig.ProvinceTexture.height;
+            MapSize = mapConfig.MapSizeInWorld;
+            MapStartPoint = mapConfig.MapStartPoint;
         }
         
         public long GenerateBorderID(int color1, int color2)
@@ -50,33 +43,33 @@ namespace MapBorderRenderer
         public int GetLeftIndex(int currentIndex)
         {
             var leftIndex = currentIndex - 1;
-            if(leftIndex % TextureWidth == TextureWidth - 1) leftIndex += TextureWidth;
-            if(currentIndex == 0) leftIndex = TextureWidth - 1;
+            if(leftIndex % TexWidth == TexWidth - 1) leftIndex += TexWidth;
+            if(currentIndex == 0) leftIndex = TexWidth - 1;
             return leftIndex;
         }
                 
         public int GetRightIndex(int currentIndex)
         {
             var rightIndex = currentIndex + 1;
-            if(rightIndex % TextureWidth == 0) rightIndex -= TextureWidth;
+            if(rightIndex % TexWidth == 0) rightIndex -= TexWidth;
                     
             return rightIndex;
         }
                 
         public int GetUpIndex(int currentIndex)
         {                                
-            if (currentIndex + TextureWidth < TextureArr.Length)
+            if (currentIndex + TexWidth < TexPixels.Length)
             {
-                return currentIndex + TextureWidth;
+                return currentIndex + TexWidth;
             }
             return currentIndex;
         }
                 
         public int GetDownIndex(int currentIndex)
         {                             
-            if (currentIndex - TextureWidth >= 0)
+            if (currentIndex - TexWidth >= 0)
             {
-                return currentIndex - TextureWidth;
+                return currentIndex - TexWidth;
             }
             return currentIndex;
         }
@@ -84,8 +77,8 @@ namespace MapBorderRenderer
         public Vector2 ConvertIndexToFloatPixelCoordinated(int index)
         {          
             var result = Vector2.zero;
-            result.x = index % TextureWidth;
-            result.y = index / TextureWidth;
+            result.x = index % TexWidth;
+            result.y = index / TexWidth;
                     
             return result;
         }
@@ -93,8 +86,8 @@ namespace MapBorderRenderer
         public Vector2Int ConvertIndexToIntPixelCoordinated(int index)
         {          
             var result = Vector2Int.zero;
-            result.x = index % TextureWidth;
-            result.y = index / TextureWidth;
+            result.x = index % TexWidth;
+            result.y = index / TexWidth;
                     
             return result;
         }

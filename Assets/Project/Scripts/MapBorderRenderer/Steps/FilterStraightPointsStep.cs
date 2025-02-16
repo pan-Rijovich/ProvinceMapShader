@@ -10,16 +10,16 @@ namespace MapBorderRenderer
     {
         private readonly Stopwatch _stopwatch = new();
         private readonly bool _showExecutionInfo;
-        private MapBorderData _data;
+        private MapBorderGenData _genData;
         private HashSet<int> _pointsForDelete = new (100);
         private int _deletedPointsCount;
         private BorderPoint _currentPoint;
         private BorderPoint _previousPoint;
         private Vector2Int _moveDirection;
 
-        public FilterStraightPointsStep(MapBorderData data, bool showExecutionInfo = false)
+        public FilterStraightPointsStep(MapBorderGenData genData, bool showExecutionInfo = false)
         {
-            _data = data;
+            _genData = genData;
             _showExecutionInfo = showExecutionInfo;
         }
 
@@ -36,7 +36,7 @@ namespace MapBorderRenderer
             _stopwatch.Restart();
 
             _deletedPointsCount = 0;
-            foreach (var border in _data.BordersCreationData.Values)
+            foreach (var border in _genData.BordersCreationData.Values)
             {            
                 foreach (var subBorder in border)
                 {

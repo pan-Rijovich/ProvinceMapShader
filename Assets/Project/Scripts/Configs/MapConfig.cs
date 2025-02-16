@@ -2,10 +2,22 @@
 
 namespace Project.Scripts.Configs
 {
-    [CreateAssetMenu(fileName = "MapConfig", menuName = "Configs/Map Config")]
+    [CreateAssetMenu(fileName = "MapTextureConfig", menuName = "Configs/MapTextureConfig")]
     public class MapConfig : ScriptableObject
     {
-        [field: SerializeField] public Texture2D ProvinceTexture { get; private set; }
-        [field: SerializeField] public float ChunkSize { get; private set; }
+        public Texture2D TerrainTexture;
+        public Texture2D ProvinceTexture;
+        public Texture2D NormalTexture;
+        public Texture2D HeightTexture;
+        public Texture2D RemapTexture;
+        public Texture2D ProvincePalette;
+        public Texture2D BorderPalette;
+        
+        public Vector3 MapSizeInWorld;
+        public Vector3 MapStartPoint;
+
+        public LineRenderer BorderPrefab;
+        public MeshRenderer ChunkPrefab;
+
     }
 }

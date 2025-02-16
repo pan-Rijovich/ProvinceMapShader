@@ -1,32 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Sirenix.OdinInspector;
+using Project.Scripts.Configs;
 using UnityEngine;
-using UnityEngine.Serialization;
+using Object = UnityEngine.Object;
 
 namespace Project.Scripts.MapRenderer
 {
-    public class ChunkSystem : MonoBehaviour
+    public class ChunkSystem
     {
-        [SerializeField] private Vector2Int _mapSize = new Vector2Int(5632, 2048);
-        [SerializeField] private int _chunkSize = 128;
-        [SerializeField] private MeshRenderer _quadPrefab;
-        [SerializeField] private BorderRenderCamera _borderRenderCamera;
-        
+        private BorderRenderCamera _borderRenderCamera;
+        private MapConfig _config;
+        private Transform _chunkContainer;
         private List<List<MeshRenderer>> _chunks;
-        
         private Vector2 _chunkTilling;
         private Vector2Int _chunkCount;
+        private int _chunkSize = 128;
 
-        private void Awake()
+        public ChunkSystem(BorderRenderCamera borderRenderCamera, MapConfig config)
         {
-            _chunkCount.x = (int)MathF.Ceiling((float)_mapSize.x / _chunkSize);
-            _chunkCount.y = (int)MathF.Ceiling((float)_mapSize.y / _chunkSize);
+            _borderRenderCamera = borderRenderCamera;
+            _config = config;
+
+            _chunkContainer = new GameObject("Chunks").transform;
+            _chunkCount.x = (int)MathF.Ceiling((float)_config.MapSizeInWorld.x / _chunkSize);
+            _chunkCount.y = (int)MathF.Ceiling((float)_config.MapSizeInWorld.y / _chunkSize);
             _chunkTilling.x = 1f / _chunkCount.x;
             _chunkTilling.y = 1f / _chunkCount.y;
-            
-            var startOffset = new Vector3(-_mapSize.x / 2f, -_mapSize.y / 2f) + new Vector3(_chunkSize / 2f, _chunkSize / 2f);
+
+            CreateChunks();
+            BakeChunkBorders();
+        }
+
+        private void CreateChunks()
+        {
+            var startOffset = _config.MapStartPoint + new Vector3(_chunkSize / 2f, _chunkSize / 2f);
             
             _chunks = new List<List<MeshRenderer>>(_chunkCount.y);
 
@@ -36,7 +43,7 @@ namespace Project.Scripts.MapRenderer
                 
                 for (int x = 0; x < _chunkCount.x; x++)
                 {
-                    var chunk = Instantiate(_quadPrefab, transform);
+                    var chunk = Object.Instantiate(_config.ChunkPrefab, _chunkContainer);
                     chunk.name = $"Chunk {x}, {y}";
                     chunk.transform.position = startOffset + new Vector3(x * _chunkSize, y * _chunkSize);
                     
@@ -49,8 +56,7 @@ namespace Project.Scripts.MapRenderer
                 }
             }
         }
-
-        [Button]
+        
         private void BakeChunkBorders()
         {
             foreach (var chunkLine in _chunks)

@@ -3,25 +3,25 @@ using UnityEngine;
 
 namespace Assets.Scripts
 {
-    public class MapInput : MonoBehaviour
+    public class MapInput
     {
-        [SerializeField] Mapshower _mapshower;
-
+        private MapShower _mapShower;
         private Camera _cam;
 
-        private void Awake()
+        public MapInput(MapShower mapShower)
         {
+            _mapShower = mapShower;
             _cam = Camera.main;
         }
 
-        private void Update()
+        public void Update()
         {
             var mousePos = Input.mousePosition;
             var ray = _cam.ScreenPointToRay(mousePos);
             RaycastHit hitInfo;
             if (Physics.Raycast(ray, out hitInfo))
             {
-                if(_mapshower.enabled)_mapshower.SelectProvince(hitInfo.textureCoord);
+                _mapShower.SelectProvince(hitInfo.textureCoord);
             }
         }
     }

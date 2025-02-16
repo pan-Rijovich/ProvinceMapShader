@@ -10,15 +10,15 @@ namespace MapBorderRenderer
     public class LoadPointsStep : IBorderCreationStep
     {
         private readonly Stopwatch _stopwatch = new();
-        private readonly MapBorderData _data;
+        private readonly MapBorderGenData _genData;
         private readonly bool _showExecutionInfo;
         private float _executionTime;
 
         private IStorageService _storage = new BinaryStorageService();
 
-        public LoadPointsStep(MapBorderData data, bool showExecutionInfo = false)
+        public LoadPointsStep(MapBorderGenData genData, bool showExecutionInfo = false)
         {
-            _data = data;
+            _genData = genData;
             _showExecutionInfo = showExecutionInfo;
         }
 
@@ -27,7 +27,7 @@ namespace MapBorderRenderer
             _stopwatch.Restart();
             
             _storage.Load<BorderSaveData[]>("BorderPoints", 
-                obj => _data.BordersSaveData = obj);
+                obj => _genData.BordersSaveData = obj);
             
             _stopwatch.Stop();
             if(_showExecutionInfo) Debug.Log(GetExecutionInfo());

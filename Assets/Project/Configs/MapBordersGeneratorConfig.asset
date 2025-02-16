@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaef4eea903a48da9558f91e923b1139, type: 3}
+  m_Name: MapBordersGeneratorConfig
+  m_EditorClassIdentifier: 
+  _debugProvince:
+    serializedVersion: 2
+    rgba: 4294822746
+  _oldDebugProvince:
+    serializedVersion: 2
+    rgba: 4294827867
+  _debugMode: 1
+  _debugStep: 2
+  _showDebug: 0
+  _showExecutionInfo: 1

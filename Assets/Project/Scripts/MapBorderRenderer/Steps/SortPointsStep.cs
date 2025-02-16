@@ -11,7 +11,7 @@ namespace MapBorderRenderer
     {
         private readonly Stopwatch _stopwatch = new();
         private readonly bool _showExecutionInfo;
-        private readonly MapBorderData _data;
+        private readonly MapBorderGenData _genData;
         private HashSet<BorderPoint> _unsortedPoints;
         //private LinkedList<BorderPoint> _points;
         private BorderPoint _startPoint;
@@ -19,18 +19,18 @@ namespace MapBorderRenderer
         private BorderPoint _previousPoint;
         private List<BorderPoint> _ = new();
 
-        public SortPointsStep(MapBorderData data, bool showExecutionInfo = false)
+        public SortPointsStep(MapBorderGenData genData, bool showExecutionInfo = false)
         {
-            _data = data;
+            _genData = genData;
             _showExecutionInfo = showExecutionInfo;
         }
         
         public void DrawGizmos(Color32 provColor, Color32 provColor2, int mode)
         {
-            var id = _data.GenerateBorderID(provColor.ToInt(), provColor2.ToInt());
-            if (_data.BordersCreationData.TryGetValue(id, out var border))
+            var id = _genData.GenerateBorderID(provColor.ToInt(), provColor2.ToInt());
+            if (_genData.BordersCreationData.TryGetValue(id, out var border))
             {
-                Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2);// + new Vector3(0.5f, 0.5f);
+                Vector3 start = new Vector3(-_genData.MapSize.x / 2, -_genData.MapSize.y / 2);// + new Vector3(0.5f, 0.5f);
                 
                 
                 foreach (var subborder in border)
@@ -86,7 +86,7 @@ namespace MapBorderRenderer
         public async Task Execute()
         {
             _stopwatch.Restart();
-            foreach (var border in _data.BordersCreationData.Values)
+            foreach (var border in _genData.BordersCreationData.Values)
             {            
                 foreach (var subBorder in border)
                 {
@@ -255,10 +255,10 @@ namespace MapBorderRenderer
 
         private int CalculateParentOffset(BorderPoint currentPoint, BorderPoint offsetPoint)
         {
-            var currentFrom = _data.ConvertIndexToIntPixelCoordinated(currentPoint.FromPixelIndex);
-            var currentTo = _data.ConvertIndexToIntPixelCoordinated(currentPoint.ToPixelIndex);
-            var offsetFrom = _data.ConvertIndexToIntPixelCoordinated(offsetPoint.FromPixelIndex);
-            var offsetTo = _data.ConvertIndexToIntPixelCoordinated(offsetPoint.ToPixelIndex);
+            var currentFrom = _genData.ConvertIndexToIntPixelCoordinated(currentPoint.FromPixelIndex);
+            var currentTo = _genData.ConvertIndexToIntPixelCoordinated(currentPoint.ToPixelIndex);
+            var offsetFrom = _genData.ConvertIndexToIntPixelCoordinated(offsetPoint.FromPixelIndex);
+            var offsetTo = _genData.ConvertIndexToIntPixelCoordinated(offsetPoint.ToPixelIndex);
             
             var xDifference = currentFrom.x - offsetFrom.x;
             var yDifference = currentTo.y - offsetTo.y;

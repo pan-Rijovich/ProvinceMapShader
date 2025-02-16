@@ -10,15 +10,15 @@ namespace MapBorderRenderer
     public class SavePointsStep : IBorderCreationStep
     {
         private readonly Stopwatch _stopwatch = new();
-        private readonly MapBorderData _data;
+        private readonly MapBorderGenData _genData;
         private readonly bool _showExecutionInfo;
         private float _executionTime;
 
         private IStorageService _storage = new BinaryStorageService();
 
-        public SavePointsStep(MapBorderData data, bool showExecutionInfo = false)
+        public SavePointsStep(MapBorderGenData genData, bool showExecutionInfo = false)
         {
-            _data = data;
+            _genData = genData;
             _showExecutionInfo = showExecutionInfo;
         }
 
@@ -26,15 +26,15 @@ namespace MapBorderRenderer
         {
             _stopwatch.Restart();
 
-            _data.BordersSaveData = new BorderSaveData[_data.BordersCreationData.Values.Count];
+            _genData.BordersSaveData = new BorderSaveData[_genData.BordersCreationData.Values.Count];
 
             var borderIndex = 0;
-            foreach (var border in _data.BordersCreationData.Values)
+            foreach (var border in _genData.BordersCreationData.Values)
             {
                 var borderSave = new BorderSaveData();
                 borderSave.ID = border.ID;
                 borderSave.SubBorders = new SubBorderSaveData[border.SubBorders.Count];
-                _data.BordersSaveData[borderIndex] = borderSave;
+                _genData.BordersSaveData[borderIndex] = borderSave;
 
                 var subborderIndex = 0;
                 
@@ -56,7 +56,7 @@ namespace MapBorderRenderer
                 borderIndex++;
             }
             
-            _storage.Save("BorderPoints", _data.BordersSaveData);
+            _storage.Save("BorderPoints", _genData.BordersSaveData);
             
             _stopwatch.Stop();
             if(_showExecutionInfo) Debug.Log(GetExecutionInfo());

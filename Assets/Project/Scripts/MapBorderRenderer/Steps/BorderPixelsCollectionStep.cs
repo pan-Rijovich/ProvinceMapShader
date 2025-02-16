@@ -9,7 +9,7 @@ namespace MapBorderRenderer
 {
     public class BorderPixelsCollectionStep : IBorderCreationStep
     {
-        private readonly MapBorderData _data;
+        private readonly MapBorderGenData _genData;
         private HashSet<int> _handledPixels;
         private Queue<int> _queue;
         private HashSet<int> _queueContainsChecker;
@@ -18,24 +18,24 @@ namespace MapBorderRenderer
 
         private int _tstI;
 
-        public BorderPixelsCollectionStep(MapBorderData data, bool showExecutionInfo = false)
+        public BorderPixelsCollectionStep(MapBorderGenData genData, bool showExecutionInfo = false)
         {
-            _data = data;
+            _genData = genData;
             _showExecutionInfo = showExecutionInfo;
         }
 
         public void DrawGizmos(Color32 provColor, Color32 provColor2, int mode)
         {
-            if (_data.BorderPixels.ContainsKey(provColor.ToInt()))
+            if (_genData.BorderPixels.ContainsKey(provColor.ToInt()))
             {
-                var borderPixels = _data.BorderPixels[provColor.ToInt()];
+                var borderPixels = _genData.BorderPixels[provColor.ToInt()];
                 
-                Vector3 start = new Vector3(-_data.MeshSize.x / 2, -_data.MeshSize.y / 2) + new Vector3(0.5f, 0.5f);
+                Vector3 start = new Vector3(-_genData.MapSize.x / 2, -_genData.MapSize.y / 2) + new Vector3(0.5f, 0.5f);
 
                 if (mode != 0)
                 {
                     Gizmos.color = Color.magenta;
-                    Vector3 pos2 = start + (Vector3)_data.ConvertIndexToFloatPixelCoordinated(_tstI);
+                    Vector3 pos2 = start + (Vector3)_genData.ConvertIndexToFloatPixelCoordinated(_tstI);
                     Gizmos.DrawSphere(pos2, 0.35f); 
                 }
                 
@@ -46,7 +46,7 @@ namespace MapBorderRenderer
                     {
                         Gizmos.color = Color.red;
 
-                        Vector3 pos = start + (Vector3)_data.ConvertIndexToFloatPixelCoordinated(index);
+                        Vector3 pos = start + (Vector3)_genData.ConvertIndexToFloatPixelCoordinated(index);
                         Gizmos.DrawSphere(pos, 0.25f);
                     }
                     counter++;
@@ -59,7 +59,7 @@ namespace MapBorderRenderer
                     {
                         Gizmos.color = Color.blue;
 
-                        Vector3 pos = start + (Vector3)_data.ConvertIndexToFloatPixelCoordinated(index);
+                        Vector3 pos = start + (Vector3)_genData.ConvertIndexToFloatPixelCoordinated(index);
                         Gizmos.DrawSphere(pos, 0.15f);
                     }
                 }
@@ -73,15 +73,15 @@ namespace MapBorderRenderer
             _queueContainsChecker = new(1024);
             
             _stopwatch.Restart();
-            for (int i = 0; i < _data.TextureArr.Length - 1; i++)
+            for (int i = 0; i < _genData.TexPixels.Length - 1; i++)
             {
                 if (_handledPixels.Contains(i) == false)
                 {
-                    int current = _data.TextureArr[i].ToInt();
+                    int current = _genData.TexPixels[i].ToInt();
                     
-                    if(_data.BorderPixels.ContainsKey(current) == false) _data.BorderPixels.Add(current, new BorderPixelsCollection(current));
+                    if(_genData.BorderPixels.ContainsKey(current) == false) _genData.BorderPixels.Add(current, new BorderPixelsCollection(current));
                     var borderPixelsCluster = new HashSet<int>(64);
-                    _data.BorderPixels[current].AddCluster(borderPixelsCluster);
+                    _genData.BorderPixels[current].AddCluster(borderPixelsCluster);
                     
                     _queue.Clear();
                     _queue.Enqueue(i);
@@ -98,10 +98,10 @@ namespace MapBorderRenderer
                         _tstI = pixelIndex; // -----------------------------------
                         
                         var isBorder = false;
-                        var upIndex = _data.GetUpIndex(pixelIndex);
-                        var leftIndex = _data.GetLeftIndex(pixelIndex);
-                        var downIndex = _data.GetDownIndex(pixelIndex);
-                        var rightIndex = _data.GetRightIndex(pixelIndex);
+                        var upIndex = _genData.GetUpIndex(pixelIndex);
+                        var leftIndex = _genData.GetLeftIndex(pixelIndex);
+                        var downIndex = _genData.GetDownIndex(pixelIndex);
+                        var rightIndex = _genData.GetRightIndex(pixelIndex);
 
                         TryAddCollectNeighbourPixel(pixelIndex, upIndex, ref isBorder, borderPixelsCluster);
                         TryAddCollectNeighbourPixel(pixelIndex, leftIndex, ref isBorder, borderPixelsCluster);
@@ -127,7 +127,7 @@ namespace MapBorderRenderer
         public string GetExecutionInfo()
         {
             int borderPixelsCount = 0;
-            foreach (var border in _data.BorderPixels.Values)
+            foreach (var border in _genData.BorderPixels.Values)
             {
                 foreach (var subborder in border.Pixels)
                 {
@@ -137,7 +137,7 @@ namespace MapBorderRenderer
             
             var msg = $"{GetType().Name} handled {_handledPixels.Count} pixels";
             msg += $" and collected {borderPixelsCount} border pixels";
-            msg += $" for {_data.BorderPixels.Count} colors";
+            msg += $" for {_genData.BorderPixels.Count} colors";
             msg += $" in {_stopwatch.ElapsedMilliseconds} milliseconds";
             
             return msg;
@@ -147,8 +147,8 @@ namespace MapBorderRenderer
         {
             if(_queueContainsChecker.Contains(neighbourPixel)) return;
             
-            var colorFrom = _data.TextureArr[pixel].ToInt();
-            var colorTo = _data.TextureArr[neighbourPixel].ToInt();
+            var colorFrom = _genData.TexPixels[pixel].ToInt();
+            var colorTo = _genData.TexPixels[neighbourPixel].ToInt();
             
             if (colorFrom == colorTo)
             {
