@@ -22,4 +22,4 @@ MonoBehaviour:
   MapSizeInWorld: {x: 5632, y: 2048, z: 0}
   MapStartPoint: {x: 0, y: 0, z: 0}
   BorderPrefab: {fileID: 1196981535863215847, guid: 0f5c45a25b0dd794eb5feaf16726ba62, type: 3}
-  ChunkPrefab: {fileID: 2966307020322707457, guid: 7cd348d4ba635764782d20147f22625f, type: 3}
+  ChunkPrefab: {fileID: 9187826354839948490, guid: 7cd348d4ba635764782d20147f22625f, type: 3}

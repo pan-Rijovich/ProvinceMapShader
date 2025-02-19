@@ -5,6 +5,7 @@ using MapBorderRenderer;
 using MapRenderer;
 using Project.Scripts.Configs;
 using Project.Scripts.MapRenderer;
+using R3;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -19,13 +20,14 @@ public class EntryPoint : MonoBehaviour
     [InlineEditor, SerializeField] private MapBordersGeneratorConfig _mapBordersGeneratorConfig;
 
     private MapInput _input;
+    private ReactiveProperty<int> _tst;
     
     private async void Awake()
     {
         var mapBordersGenerator = new MapBordersGenerator(_mapConfig);
         var remapBaker = new RemapBaker(_mapConfig);
-        //var mapShower = new MapShower(_mapConfig, _mapMaterial);
-        //_input = new MapInput(mapShower);
+        var mapShower = new MapShower(_mapConfig, _mapMaterial);
+        _input = new MapInput(mapShower, _mapConfig);
         
         try
         {
@@ -40,6 +42,6 @@ public class EntryPoint : MonoBehaviour
 
     private void Update()
     {
-        //_input.Update();
+        _input.Update();
     }
 }

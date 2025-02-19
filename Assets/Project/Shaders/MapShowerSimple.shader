@@ -96,7 +96,7 @@ Shader "Custom/MapShowerSimple"
             borderPaletteUV.x = lerp(borderPalettePixStep, 1.0-borderPalettePixStep, borderValue.x);
             
             float4 borderColor = tex2D(_BorderColorPalette, borderPaletteUV);
-            finalColor = lerp(finalColor, _BorderColor, borderValue.x);
+            finalColor = lerp(finalColor, _BorderColor, borderValue.x );
 
             o.Albedo = lerp(tex2D(_TerrainTex, chunkUV), finalColor, finalColor.a).rgb;
 

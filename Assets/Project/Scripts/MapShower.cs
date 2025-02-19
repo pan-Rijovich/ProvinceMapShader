@@ -9,14 +9,12 @@ using Debug = UnityEngine.Debug;
 
 public class MapShower
 {
-    private Color32 _targetColor;
+    private Color32 _targetColor = new Color32(0, 0, 0, 150);
     private Texture2D _paletteTex;
     private Texture2D _remapTex;
-    private int _width;
-    private int _height;
     private Color32 _prevRemapColor;
     private Color32 _prevPaletteColor;
-    private bool _selectAny = false;
+    private bool _isAnySelected = false;
 
     public MapShower(MapConfig config, Material material)
     {
@@ -26,31 +24,31 @@ public class MapShower
         material.SetTexture("_PaletteTex", _paletteTex);
         material.SetTexture("_RemapTex", _remapTex);
 
-        FillRandomColorPaletteTexture();
+        //FillRandomColorPaletteTexture();
     }
 
-    public void SelectProvince(Vector2 position)
+    public void SelectProvince(Vector2 uv)
     {
-        int x = (int)Mathf.Floor(position.x * _width);
-        int y = (int)Mathf.Floor(position.y * _height);
+        int x = (int)Mathf.Floor(uv.x * _remapTex.width);
+        int y = (int)Mathf.Floor(uv.y * _remapTex.height);
         var remapColor = (Color32)_remapTex.GetPixel(x, y);
 
-        if (_selectAny == false || _prevRemapColor.Equals(remapColor) == false)
+        if (_isAnySelected == false || _prevRemapColor.Equals(remapColor) == false)
         {
-            if (_selectAny)
+            if (_isAnySelected)
             {
                 ChangePaletteColor(_prevRemapColor, _prevPaletteColor);
             }
 
-            _selectAny = true;
+            _isAnySelected = true;
             _prevRemapColor = remapColor;
-            _prevPaletteColor = GetPalleteColor(remapColor.r,remapColor.g);
+            _prevPaletteColor = GetPaletteColor(remapColor.r,remapColor.g);
             ChangePaletteColor(remapColor, _targetColor);
             _paletteTex.Apply(false);
         }
     }
 
-    private Color32 GetPalleteColor(byte x, byte y) 
+    private Color32 GetPaletteColor(byte x, byte y) 
     {
         return _paletteTex.GetPixel(x, y);
     }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Project.Scripts.MapRenderer;
+using UnityEngine;
 
 namespace Project.Scripts.Configs
 {
@@ -17,7 +18,7 @@ namespace Project.Scripts.Configs
         public Vector3 MapStartPoint;
 
         public LineRenderer BorderPrefab;
-        public MeshRenderer ChunkPrefab;
+        public MapChunk ChunkPrefab;
 
     }
 }

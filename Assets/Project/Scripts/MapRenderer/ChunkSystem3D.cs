@@ -55,9 +55,9 @@ namespace Project.Scripts.MapRenderer
                     var block = new MaterialPropertyBlock();
                     Vector4 tilingOffset = new Vector4(_chunkTilling.x, _chunkTilling.y, _chunkTilling.x * x, _chunkTilling.y * y); 
                     block.SetVector("_Tilling", tilingOffset);
-                    chunk.SetPropertyBlock(block);
+                    //chunk.SetPropertyBlock(block);
                     
-                    _chunks[y].Add(chunk);
+                    //_chunks[y].Add(chunk);
                     
                     GenerateMapMesh(chunk.GetComponent<MeshFilter>(), tilingOffset);
 
@@ -75,8 +75,8 @@ namespace Project.Scripts.MapRenderer
                     var block  = new MaterialPropertyBlock();
                     chunk.GetPropertyBlock(block);
 
-                    var texture = _borderRenderCamera.Render(chunk.transform.position, _chunkSize * 0.5f);
-                    block.SetTexture("_BorderTexture", texture);
+                    //var texture = _borderRenderCamera.Render(chunk.transform.position, _chunkSize * 0.5f);
+                    //block.SetTexture("_BorderTexture", texture);
                     
                     chunk.SetPropertyBlock(block);
                 }
