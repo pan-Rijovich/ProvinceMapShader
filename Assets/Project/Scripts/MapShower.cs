@@ -29,7 +29,7 @@ public class MapShower
 
     public void SelectProvince(Vector2 uv)
     {
-        int x = (int)Mathf.Floor(uv.x * _remapTex.width);
+        /*int x = (int)Mathf.Floor(uv.x * _remapTex.width);
         int y = (int)Mathf.Floor(uv.y * _remapTex.height);
         var remapColor = (Color32)_remapTex.GetPixel(x, y);
 
@@ -45,7 +45,7 @@ public class MapShower
             _prevPaletteColor = GetPaletteColor(remapColor.r,remapColor.g);
             ChangePaletteColor(remapColor, _targetColor);
             _paletteTex.Apply(false);
-        }
+        }*/
     }
 
     private Color32 GetPaletteColor(byte x, byte y) 

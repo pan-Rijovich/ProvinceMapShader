@@ -9,7 +9,7 @@ namespace Project.Scripts.MapRenderer
 {
     public class ChunkSystem3D
     {
-        private BorderRenderCamera _borderRenderCamera;
+        private BorderBaker _borderBaker;
         private MapConfig _config;
         private Transform _chunkContainer;
         private List<List<MeshRenderer>> _chunks;
@@ -21,9 +21,9 @@ namespace Project.Scripts.MapRenderer
         private Vector2[] _uvs;
         private Color[] _colors;
 
-        public ChunkSystem3D(BorderRenderCamera borderRenderCamera, MapConfig config)
+        public ChunkSystem3D(BorderBaker borderBaker, MapConfig config)
         {
-            _borderRenderCamera = borderRenderCamera;
+            _borderBaker = borderBaker;
             _config = config;
 
             _chunkContainer = new GameObject("Chunks3D").transform;

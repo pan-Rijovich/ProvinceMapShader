@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
 using Assets.Scripts;
+using Assets.Scripts.CameraController;
 using MapBorderRenderer;
 using MapRenderer;
 using Project.Scripts.Configs;
+using Project.Scripts.MapBorderRenderer;
 using Project.Scripts.MapRenderer;
 using R3;
 using Sirenix.OdinInspector;
@@ -12,7 +14,7 @@ using UnityEngine.Serialization;
 
 public class EntryPoint : MonoBehaviour
 {
-    [SerializeField] private BorderRenderCamera _borderRenderCamera;
+    [SerializeField] private Camera _borderRenderCamera;
     [SerializeField] private Material _mapMaterial;
 
     [Header("Configs")]
@@ -21,6 +23,7 @@ public class EntryPoint : MonoBehaviour
 
     private MapInput _input;
     private ReactiveProperty<int> _tst;
+    private BorderBaker _borderBaker;
     
     private async void Awake()
     {
@@ -29,13 +32,18 @@ public class EntryPoint : MonoBehaviour
         var mapShower = new MapShower(_mapConfig, _mapMaterial);
         _input = new MapInput(mapShower, _mapConfig);
         
+        var cameraController = Camera.main.GetComponent<CameraController>();
+        //var chunkRenderSettingsProvider = new DefaultChunkRenderSettingsProvider(cameraController);
+        var chunkRenderSettingsProvider = new ResolutionTestChunkRenderSettingsProvider(cameraController);
+        
         try
         {
             var borderGenHandle = mapBordersGenerator.Generate();
 
             await borderGenHandle;
-            
-            var chunkSystem = new ChunkSystem(_borderRenderCamera, _mapConfig);
+
+            _borderBaker = new BorderBaker(_borderRenderCamera, chunkRenderSettingsProvider);
+            var chunkSystem = new ChunkSystem(_borderBaker, _mapConfig, chunkRenderSettingsProvider);
         }
         catch (OperationCanceledException){}
     }
@@ -43,5 +51,11 @@ public class EntryPoint : MonoBehaviour
     private void Update()
     {
         _input.Update();
+    }
+
+    [Button]
+    private void Save()
+    {
+        _borderBaker.Save();
     }
 }

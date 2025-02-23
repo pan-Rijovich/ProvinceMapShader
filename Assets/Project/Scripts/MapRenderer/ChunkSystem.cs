@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Project.Scripts.Configs;
+using Project.Scripts.MapBorderRenderer;
 using R3;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -10,7 +11,8 @@ namespace Project.Scripts.MapRenderer
 {
     public class ChunkSystem
     {
-        private BorderRenderCamera _borderRenderCamera;
+        private ChunkRenderSettingsProvider _settingsProvider;
+        private BorderBaker _borderBaker;
         private MapConfig _config;
         private Transform _chunkContainer;
         private List<List<MapChunk>> _chunks;
@@ -18,10 +20,11 @@ namespace Project.Scripts.MapRenderer
         private Vector2Int _chunkCount;
         private int _chunkSize = 128;
 
-        public ChunkSystem(BorderRenderCamera borderRenderCamera, MapConfig config)
+        public ChunkSystem(BorderBaker borderBaker, MapConfig config, ChunkRenderSettingsProvider settingsProvider)
         {
-            _borderRenderCamera = borderRenderCamera;
+            _borderBaker = borderBaker;
             _config = config;
+            _settingsProvider = settingsProvider;
 
             _chunkContainer = new GameObject("Chunks").transform;
             _chunkCount.x = (int)MathF.Ceiling((float)_config.MapSizeInWorld.x / _chunkSize);
@@ -31,6 +34,8 @@ namespace Project.Scripts.MapRenderer
 
             CreateChunks();
             //BakeChunksBorders();
+
+            _settingsProvider.BorderTextureResolution.Subscribe(_ => ReBakeActiveChunks());
         }
 
         private void CreateChunks()
@@ -65,7 +70,7 @@ namespace Project.Scripts.MapRenderer
             {
                 foreach (var chunk in chunkLine)
                 {
-                    _borderRenderCamera.RenderAsync(chunk.transform.position, chunk.SetBorders, _chunkSize * 0.5f);
+                    _borderBaker.RenderAsync(chunk.transform.position, chunk.SetBorders, _chunkSize * 0.5f);
                     await Task.Yield();
                 }
             }
@@ -75,7 +80,19 @@ namespace Project.Scripts.MapRenderer
         {
             if (chunk.IsVisible.CurrentValue)
             {
-                _borderRenderCamera.RenderAsync(chunk.transform.position, chunk.SetBorders, _chunkSize * 0.5f); 
+                _borderBaker.RenderAsync(chunk.transform.position, chunk.SetBorders, _chunkSize * 0.5f); 
+            }
+        }
+
+        private void ReBakeActiveChunks()
+        {
+            foreach (var chunkLine in _chunks)
+            {
+                foreach (var chunk in chunkLine)
+                {
+                    if(chunk.IsVisible.CurrentValue) _borderBaker.RenderAsync(chunk.transform.position, chunk.SetBorders, _chunkSize * 0.5f);
+                    
+                }
             }
         }
     }

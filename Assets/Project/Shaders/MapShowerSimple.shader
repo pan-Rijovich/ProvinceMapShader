@@ -13,6 +13,8 @@ Shader "Custom/MapShowerSimple"
         _BorderColorPalette ("BorderColor", 2D) = "black" {}
         _BorderColor ("BorderColor", Color) = (1,1,1,1)
         _Tilling ("Tilling", Vector) = (1,1,0,0)
+        _BorderContrast ("BorderContrast", float) = 3
+        _TSTBorderPixelEating ("TSTBorderPixelEating", Range(0.0, 0.5)) = 0.5
     }
     SubShader
     {
@@ -33,7 +35,10 @@ Shader "Custom/MapShowerSimple"
         sampler2D _BorderColorPalette;
         float4 _BorderColor;
         float4 _RemapTex_TexelSize;
-        fixed4 counter = 0;
+        float4 _BorderTexture_TexelSize;
+        float _BorderContrast;
+
+        float _TSTBorderPixelEating;
 
         //UNITY_DECLARE_TEX2D(_BorderTexture);
 
@@ -51,6 +56,24 @@ Shader "Custom/MapShowerSimple"
             fixed4 index = tex2D(_RemapTex, uv);
             fixed4 paletteValue = tex2D(_PaletteTex, index.xy * 255.0 / 256.0 + float2(0.001953125, 0.001953125));
             return paletteValue;
+        }
+
+        fixed4 multiply_final_color_on_border(float2 uv, float4 finalColor)
+        {
+            float2 pixelOffset = _BorderTexture_TexelSize.xy * _TSTBorderPixelEating;
+            float2 borderUV = lerp(pixelOffset, 1.0 - pixelOffset, uv);
+            
+            vector<float, 4> borderValue = tex2D(_BorderTexture, borderUV);
+
+            float borderPalettePixStep = 1.0 / 512.0;
+            float2 borderPaletteUV = uv;
+            borderPaletteUV.y = 0.5f;
+            borderPaletteUV.x = lerp(borderPalettePixStep, 1.0-borderPalettePixStep, borderValue.x);
+            
+            float4 borderColor = tex2D(_BorderColorPalette, borderPaletteUV);
+            float t = 1.0 - pow(1.0 - borderValue.x, _BorderContrast);
+            //float t = borderValue.x * _BorderContrast;
+            return lerp(finalColor, _BorderColor, t);;
         }
 
         void surf (Input IN, inout SurfaceOutputStandard o)
@@ -85,18 +108,8 @@ Shader "Custom/MapShowerSimple"
             float wTR = f.x * f.y;
 
             fixed4 finalColor = colorBL * wBL + colorBR * wBR + colorTL * wTL + colorTR * wTR;
-
             
-            
-            vector<float, 4> borderValue = tex2D(_BorderTexture, IN.uv_RemapTex);
-
-            float borderPalettePixStep = 1.0 / 512.0;
-            float2 borderPaletteUV = IN.uv_RemapTex;
-            borderPaletteUV.y = 0.5f;
-            borderPaletteUV.x = lerp(borderPalettePixStep, 1.0-borderPalettePixStep, borderValue.x);
-            
-            float4 borderColor = tex2D(_BorderColorPalette, borderPaletteUV);
-            finalColor = lerp(finalColor, _BorderColor, borderValue.x );
+            finalColor = multiply_final_color_on_border(IN.uv_RemapTex, finalColor);            
 
             o.Albedo = lerp(tex2D(_TerrainTex, chunkUV), finalColor, finalColor.a).rgb;
 

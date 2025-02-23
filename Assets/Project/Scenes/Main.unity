@@ -291,7 +291,6 @@ GameObject:
   m_Component:
   - component: {fileID: 920668336}
   - component: {fileID: 920668335}
-  - component: {fileID: 920668337}
   m_Layer: 0
   m_Name: BorderRenderCamera
   m_TagString: Untagged
@@ -365,20 +364,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &920668337
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 920668334}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: be95ed22846f4d87864b782149bc6594, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _camera: {fileID: 920668335}
-  _mainCamera: {fileID: 963194227}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -891,7 +876,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5444efa916e94b638c437da0668bc3e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _borderRenderCamera: {fileID: 920668337}
+  _borderRenderCamera: {fileID: 920668335}
   _mapMaterial: {fileID: 2100000, guid: 9d97825877cd5d144a3306e4cc03e7f6, type: 2}
   _mapConfig: {fileID: 11400000, guid: a5c964920efbaaa4cb582db4a68de131, type: 2}
   _mapBordersGeneratorConfig: {fileID: 11400000, guid: e6ae93e59d5b3d84fa60010e4020be4e, type: 2}

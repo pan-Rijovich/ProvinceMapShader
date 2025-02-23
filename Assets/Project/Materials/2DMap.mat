@@ -63,6 +63,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _BoolTest: 1
+    - _BorderContrast: 1
     - _BorderSize: 0
     - _DebugFloat: 0.01
     m_Colors:
