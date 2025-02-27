@@ -63,8 +63,10 @@ Material:
     m_Ints: []
     m_Floats:
     - _BoolTest: 1
+    - _BorderContrast: 1
     - _BorderSize: 0
     - _DebugFloat: 0.01
+    - _TSTBorderPixelEating: 0.5
     m_Colors:
     - _BorderColor: {r: 0, g: 0, b: 0, a: 1}
     - _DebugColor: {r: 0.58431375, g: 0.32156864, b: 0.7529412, a: 1}

@@ -95,5 +95,21 @@ namespace Project.Scripts.MapRenderer
                 }
             }
         }
+
+        private bool TryGetChunk(int x, int y, out MapChunk chunk)
+        {
+            chunk = null;
+            if(_chunks == null) return false;
+            if(_chunks.Count < y + 1) return false;
+            if(_chunks[y].Count < x + 1) return false;
+            
+            chunk = _chunks[y][x];
+            return true;
+        }
+        
+        private bool TryGetChunk(Vector2Int coordinates, out MapChunk chunk)
+        {
+            return TryGetChunk(coordinates.x, coordinates.y, out chunk);
+        }
     }
 }

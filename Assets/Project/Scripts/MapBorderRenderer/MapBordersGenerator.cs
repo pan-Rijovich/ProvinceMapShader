@@ -11,7 +11,7 @@ namespace MapBorderRenderer
         private IStorageService _storage = new BinaryStorageService();
         private List<IBorderCreationStep> _steps = new(10);
         private MapBorderGenData _mapData;
-        private bool _showExecutionInfo = false;
+        private bool _showExecutionInfo = true;
 
         public bool IsGenerated { get; private set; }
         
@@ -52,6 +52,8 @@ namespace MapBorderRenderer
             {
                 await step.Execute();
             }
+            
+            
 
             _steps = null;
             _mapData = null;

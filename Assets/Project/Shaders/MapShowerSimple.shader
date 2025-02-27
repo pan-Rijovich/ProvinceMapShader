@@ -72,8 +72,8 @@ Shader "Custom/MapShowerSimple"
             
             float4 borderColor = tex2D(_BorderColorPalette, borderPaletteUV);
             float t = 1.0 - pow(1.0 - borderValue.x, _BorderContrast);
-            //float t = borderValue.x * _BorderContrast;
-            return lerp(finalColor, _BorderColor, t);;
+            //t = borderValue.x * _BorderContrast;
+            return lerp(finalColor, _BorderColor, t);
         }
 
         void surf (Input IN, inout SurfaceOutputStandard o)

@@ -84,7 +84,12 @@ namespace MapBorderRenderer
             
             line.loop = subBorder.IsCycled;
             line.gameObject.isStatic = true;
-            line.gameObject.layer = LayerMask.NameToLayer("Border");
+            //line.gameObject.layer = LayerMask.NameToLayer("Border");
+            
+            //var mesh = new Mesh();
+            //line.BakeMesh(mesh);
+            //line.transform.GetChild(0).GetComponent<MeshFilter>().mesh = mesh;
+            //line.enabled = false;
             //subBorder.Lines.Add(line);
         }
 
